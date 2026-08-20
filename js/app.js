@@ -21,11 +21,16 @@
       el.textContent = (window.SITE && window.SITE.author) || '';
     });
 
-    /* ---- 导航当前页高亮 ---- */
-    var path = location.pathname.split('/').pop() || 'index.html';
+    /* ---- 导航当前页高亮（适配 cleanUrls + /works/:id rewrite） ---- */
+    var path = location.pathname.replace(/\/+$/, '');
+    var file = path.split('/').pop() || 'index.html';
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       var target = a.getAttribute('data-nav');
-      var isActive = (target === 'home' && (path === '' || path === 'index.html')) || path === target + '.html';
+      var isActive = false;
+      if (target === 'home')    isActive = (file === 'index.html' || file === '' || file === 'index');
+      else if (target === 'works')  isActive = (file === 'works.html' || file === 'works' || file === 'series.html' || path.indexOf('/works/') === 0);
+      else if (target === 'stream') isActive = (file === 'stream.html' || file === 'stream');
+      else if (target === 'about')  isActive = (file === 'about.html' || file === 'about');
       if (isActive) {
         a.classList.add('opacity-60');
         a.setAttribute('aria-current', 'page');

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LucaLiu Photography</title>
-  <meta name="description" content="LucaLiu Photography — a quiet collection of light, silence, and the in-between moments." />
+  <title>Stream — LucaLiu Photography</title>
+  <meta name="description" content="All photographs by Luca Liu, in a single scroll." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23F4F3EF'/><text x='16' y='22' font-family='Georgia,serif' font-size='18' fill='%232B2B28' text-anchor='middle'>L</text></svg>" />
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -47,32 +47,13 @@
   </header>
 
   <main>
-    <!-- 首屏：极简引言 -->
-    <section class="section-breathe text-center px-6">
-      <p class="reveal text-xs tracking-wide-3 uppercase text-muted">Photography</p>
-      <h1 class="reveal title text-6xl sm:text-8xl mt-7">LucaLiu</h1>
-      <p class="reveal max-w-md mx-auto mt-7 text-muted leading-relaxed">
-        A quiet collection of light, silence, and the in-between moments.
-      </p>
+    <section class="pt-28 pb-12 px-6 sm:px-10 max-w-[var(--maxw)] mx-auto">
+      <h1 class="reveal title text-4xl sm:text-6xl">Stream</h1>
+      <p class="reveal text-sm text-muted mt-3">All photographs, one continuous scroll.</p>
     </section>
 
-    <!-- 精选系列（满宽大图，川内风格） -->
-    <section class="pb-24">
-      <div id="featured" class="featured-list max-w-[var(--maxw)] mx-auto px-6 sm:px-10"></div>
-    </section>
-
-    <!-- 双模式入口 -->
-    <section class="pb-32 px-6">
-      <div class="max-w-[var(--maxw)] mx-auto grid sm:grid-cols-2 gap-px bg-[var(--line)] border border-[var(--line)]">
-        <a href="works.html" class="mode-entry block bg-[var(--paper)] px-8 py-14 text-center">
-          <p class="reveal title text-3xl sm:text-4xl">Works</p>
-          <p class="reveal text-xs tracking-wide-2 uppercase text-muted mt-3">Browse by series</p>
-        </a>
-        <a href="stream.html" class="mode-entry block bg-[var(--paper)] px-8 py-14 text-center">
-          <p class="reveal title text-3xl sm:text-4xl">Stream</p>
-          <p class="reveal text-xs tracking-wide-2 uppercase text-muted mt-3">One continuous scroll</p>
-        </a>
-      </div>
+    <section class="max-w-[var(--maxw)] mx-auto px-6 sm:px-10 pb-32">
+      <div id="stream-root" class="single-column"></div>
     </section>
   </main>
 
@@ -86,6 +67,6 @@
   <script src="js/data.js"></script>
   <script src="js/lightbox.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/home.js"></script>
+  <script src="js/stream.js"></script>
 </body>
 </html>

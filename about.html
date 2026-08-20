@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About — LucaLiu Photography</title>
   <meta name="description" content="About Luca Liu — photographer." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23FAFAF7'/><text x='16' y='22' font-family='Georgia,serif' font-size='18' fill='%232B2B28' text-anchor='middle'>L</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23F4F3EF'/><text x='16' y='22' font-family='Georgia,serif' font-size='18' fill='%232B2B28' text-anchor='middle'>L</text></svg>" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: { extend: {
-        colors: { paper:'#FAFAF7','paper-2':'#F3F2EE', ink:'#2B2B28', muted:'#9A9A92', line:'#E7E5DF' },
-        fontFamily: { display:['Jost','Inter','sans-serif'], body:['Inter','sans-serif'] }
+        colors: { paper:'#F4F3EF','paper-2':'#ECEAE4', ink:'#2B2B28', muted:'#9A9A92', line:'#E0DED8' },
+        fontFamily: { display:['Cormorant Garamond','serif'], body:['Inter','sans-serif'] }
       } }
     };
   </script>
@@ -27,18 +27,20 @@
           <span class="block leading-none">LUCA LIU</span>
           <span class="block text-[10px] tracking-wide-3 text-muted mt-1">PHOTOGRAPHY</span>
         </a>
-        <nav class="hidden sm:flex items-center gap-10 text-xs tracking-wide-2 uppercase">
-          <a href="index.html"   data-nav="home"    class="link-quiet">Home</a>
-          <a href="gallery.html" data-nav="gallery" class="link-quiet">Gallery</a>
-          <a href="about.html"   data-nav="about"   class="link-quiet">About</a>
+        <nav class="hidden sm:flex items-center gap-8 text-xs tracking-wide-2 uppercase">
+          <a href="index.html"  data-nav="home"   class="link-quiet">Home</a>
+          <a href="works.html"  data-nav="works"  class="link-quiet">Works</a>
+          <a href="stream.html" data-nav="stream" class="link-quiet">Stream</a>
+          <a href="about.html"  data-nav="about"  class="link-quiet">About</a>
         </nav>
         <button class="sm:hidden text-xl" data-menu-toggle aria-label="Menu">&#9776;</button>
       </div>
       <div class="mobile-menu sm:hidden" data-mobile-menu>
         <nav class="flex flex-col gap-5 pb-6 text-xs tracking-wide-2 uppercase">
-          <a href="index.html"   data-nav="home"    class="link-quiet">Home</a>
-          <a href="gallery.html" data-nav="gallery" class="link-quiet">Gallery</a>
-          <a href="about.html"   data-nav="about"   class="link-quiet">About</a>
+          <a href="index.html"  data-nav="home"   class="link-quiet">Home</a>
+          <a href="works.html"  data-nav="works"  class="link-quiet">Works</a>
+          <a href="stream.html" data-nav="stream" class="link-quiet">Stream</a>
+          <a href="about.html"  data-nav="about"  class="link-quiet">About</a>
         </nav>
       </div>
     </div>

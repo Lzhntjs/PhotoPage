@@ -1,41 +1,47 @@
 /* ==========================================================================
-   home.js — 首页精选系列渲染
-   布局：精选系列封面满宽大图，图下左对齐标题+年份（与 Works 列表同款，川内风格）
+   stream.js — 单张滚动模式
+   把所有照片扁平化（按系列日期倒序），单列大图纵向滚动
+   交互：点击任一图 → 灯箱（全部照片，支持缩放/左右滑动）
    ========================================================================== */
 (function () {
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
-    var container = document.getElementById('featured');
-    if (!container) return;
+    var root = document.getElementById('stream-root');
+    if (!root) return;
 
-    var list = (window.Works && window.Works.featured()) || [];
-    if (!list.length) {
-      // 无精选时退化为全部系列
-      list = (window.Works && window.Works.allSeries()) || [];
-    }
-    if (!list.length) {
-      container.innerHTML = '<p class="text-center text-muted text-sm">No featured works yet.</p>';
+    var photos = (window.Works && window.Works.allPhotos()) || [];
+    if (!photos.length) {
+      root.innerHTML = '<p class="text-center text-muted text-sm py-20">No photographs yet.</p>';
       return;
     }
 
-    list.forEach(function (s, i) {
-      var wrap = document.createElement('a');
-      wrap.href = 'works/' + encodeURIComponent(s.id);
-      wrap.className = 'series-card reveal block';
-      wrap.style.transitionDelay = (i * 90) + 'ms';
-      wrap.innerHTML =
-        '<div class="frame">' +
-          '<img class="lazy-img" loading="lazy" alt="' + escapeAttr(s.title) + '" data-src="' + escapeAttr(s.cover) + '" />' +
-        '</div>' +
-        '<div class="series-meta">' +
-          '<div class="title">' + escapeHtml(s.title) + '</div>' +
-          '<div class="year">' + escapeHtml(String(s.year)) + '</div>' +
+    var html = '';
+    photos.forEach(function (p, i) {
+      var seriesTitle = p.series ? p.series.title : '';
+      var alt = seriesTitle ? (seriesTitle + ' ' + (p.index + 1)) : ('Photo ' + (i + 1));
+      var caption = p.caption || '';
+      // 系列归属作为副信息（克制的灰色小字）
+      if (seriesTitle && !caption) caption = 'From the series ' + seriesTitle;
+      html +=
+        '<div class="photo reveal" style="transition-delay:' + (i * 50) + 'ms">' +
+          '<img class="lazy-img" loading="lazy" alt="' + escapeAttr(alt) + '" data-src="' + escapeAttr(p.src) + '" />' +
+          (caption ? '<p class="caption">' + escapeHtml(caption) + '</p>' : '') +
         '</div>';
-      container.appendChild(wrap);
+    });
+    root.innerHTML = html;
+
+    /* 点击任一图 → 灯箱（全部照片） */
+    var imgs = root.querySelectorAll('.photo img');
+    imgs.forEach(function (img, i) {
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', function () {
+        var items = photos.map(function (p) { return { full: p.src, title: p.series ? p.series.title : '' }; });
+        window.Lightbox.open(items, i);
+      });
     });
 
-    observe(container);
+    observe(root);
   });
 
   function observe(root) {
@@ -46,7 +52,7 @@
     }
     var ro = new IntersectionObserver(function (entries, obs) {
       entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
-    }, { threshold: .1 });
+    }, { threshold: .08 });
     root.querySelectorAll('.reveal').forEach(function (el) { ro.observe(el); });
 
     var io = new IntersectionObserver(function (entries, obs) {
@@ -55,7 +61,7 @@
         loadImg(e.target);
         obs.unobserve(e.target);
       });
-    }, { rootMargin: '300px 0px' });
+    }, { rootMargin: '400px 0px' });
     root.querySelectorAll('img.lazy-img[data-src]').forEach(function (el) { io.observe(el); });
   }
 

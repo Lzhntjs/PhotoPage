@@ -4,19 +4,20 @@
    仅放置 Tailwind 难以表达的细节：字体、设计令牌、过渡、灯箱等
    ========================================================================== */
 
-/* ---------- 字体（Google Fonts，优雅低对比无衬线） ---------- */
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@300;400;500&display=swap');
+/* ---------- 字体（Google Fonts，川内风格的衬线标题 + 安静无衬线正文） ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400&display=swap');
 
 /* ---------- 设计令牌 ---------- */
 :root {
-  --paper:    #FAFAF7;   /* 极浅白背景 */
-  --paper-2:  #F3F2EE;   /* 次级背景 */
-  --ink:      #2B2B28;   /* 主文字 */
-  --muted:    #9A9A92;   /* 次级文字 */
-  --line:     #E7E5DF;   /* 细分割线 */
-  --accent:   #2B2B28;   /* 强调（保持克制，与墨色同 */
+  --paper:    #F4F3EF;   /* 川内风格的极浅暖灰背景 */
+  --paper-2:  #ECEAE4;   /* 次级背景 / 图占位灰 */
+  --ink:      #2B2B28;   /* 主文字（近黑深灰） */
+  --muted:    #9A9A92;   /* 次级文字（年份等） */
+  --line:     #E0DED8;   /* 细分割线 */
+  --accent:   #2B2B28;
   --ease:     cubic-bezier(.22, .61, .36, 1);
   --maxw:     1280px;
+  --maxw-text: 920px;   /* 文字阅读最佳宽度 */
 }
 
 /* ---------- 基础 ---------- */
@@ -32,10 +33,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.font-display { font-family: 'Jost', 'Inter', sans-serif; }
+.font-display { font-family: 'Cormorant Garamond', 'Times New Roman', serif; }
 
-/* 优雅细字标题 */
-h1, h2, h3, .title { font-family: 'Jost', 'Inter', sans-serif; font-weight: 300; letter-spacing: .02em; }
+/* 川内风格：衬线标题，细字重，左对齐为主 */
+h1, h2, h3, .title {
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
 
 /* 字距克制的英文标识 */
 .tracking-wide-2 { letter-spacing: .18em; }
@@ -235,6 +241,110 @@ main { animation: pageIn 1s var(--ease) both; }
 
 /* ---------- 章节呼吸留白 ---------- */
 .section-breathe { padding-block: clamp(4rem, 10vw, 9rem); }
+
+/* ==========================================================================
+   川内伦子风格：Works 系列列表
+   - 单列纵向，每行一张满宽大图
+   - 图下左对齐：标题（衬线大字）+ 年份（灰色小字）
+   - 图与图之间垂直留白极大（图高的 ~50%）
+   ========================================================================== */
+.works-list { display: flex; flex-direction: column; }
+
+.series-card {
+  display: block;
+  margin-bottom: clamp(4rem, 9vw, 8rem);  /* 极大留白，川内特征 */
+}
+.series-card:last-child { margin-bottom: 0; }
+
+.series-card .frame {
+  overflow: hidden;
+  background: var(--paper-2);
+  width: 100%;
+}
+.series-card .frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 2.4s var(--ease), filter 1.6s var(--ease);
+}
+.series-card:hover .frame img { transform: scale(1.02); filter: brightness(1.02); }
+
+/* 图下文字：左对齐，标题大，年份小灰 */
+.series-meta { margin-top: 1.5rem; }
+.series-meta .title {
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  line-height: 1.1;
+}
+.series-meta .year {
+  margin-top: .35rem;
+  font-family: 'Inter', sans-serif;
+  font-size: .85rem;
+  color: var(--muted);
+  letter-spacing: .04em;
+  font-weight: 300;
+}
+
+/* 分类次级标题（在系列列表上方分组） */
+.category-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: .04em;
+  color: var(--ink);
+  margin: clamp(2.5rem, 6vw, 5rem) 0 clamp(2rem, 4vw, 3rem);
+  padding-bottom: .8rem;
+  border-bottom: 1px solid var(--line);
+}
+.category-heading:first-child { margin-top: 0; }
+.category-heading .count {
+  margin-left: .8rem;
+  font-family: 'Inter', sans-serif;
+  font-size: .7rem;
+  color: var(--muted);
+  letter-spacing: .12em;
+  vertical-align: middle;
+}
+
+/* ==========================================================================
+   系列详情 / Stream 单张：单列大图纵向滚动，图间距紧凑
+   ========================================================================== */
+.single-column { display: flex; flex-direction: column; }
+.single-column .photo {
+  width: 100%;
+  margin-bottom: clamp(.5rem, 1.5vw, 1.2rem);  /* 川内详情页图间距紧凑 */
+}
+.single-column .photo:last-child { margin-bottom: 0; }
+.single-column .photo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.single-column .photo .caption {
+  margin-top: .6rem;
+  font-size: .82rem;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: var(--maxw-text);
+}
+
+/* 返回链接（系列详情顶部） */
+.back-link {
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem;
+  letter-spacing: .12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  transition: color .4s var(--ease);
+}
+.back-link:hover { color: var(--ink); }
+
+/* 首页精选：与系列列表同款满宽大图 */
+.featured-list { display: flex; flex-direction: column; gap: clamp(4rem, 9vw, 8rem); }
+
+/* 模式切换入口（首页底部） */
+.mode-entry { transition: opacity .5s var(--ease); }
+.mode-entry:hover { opacity: .55; }
 
 /* ---------- 减少动画偏好 ---------- */
 @media (prefers-reduced-motion: reduce) {
