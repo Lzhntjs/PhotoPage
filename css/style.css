@@ -1,0 +1,243 @@
+/* ==========================================================================
+   LucaLiu Photography — Custom Styles
+   设计语言：安静、克制、大量留白、柔和、艺术书籍感
+   仅放置 Tailwind 难以表达的细节：字体、设计令牌、过渡、灯箱等
+   ========================================================================== */
+
+/* ---------- 字体（Google Fonts，优雅低对比无衬线） ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@300;400;500&display=swap');
+
+/* ---------- 设计令牌 ---------- */
+:root {
+  --paper:    #FAFAF7;   /* 极浅白背景 */
+  --paper-2:  #F3F2EE;   /* 次级背景 */
+  --ink:      #2B2B28;   /* 主文字 */
+  --muted:    #9A9A92;   /* 次级文字 */
+  --line:     #E7E5DF;   /* 细分割线 */
+  --accent:   #2B2B28;   /* 强调（保持克制，与墨色同 */
+  --ease:     cubic-bezier(.22, .61, .36, 1);
+  --maxw:     1280px;
+}
+
+/* ---------- 基础 ---------- */
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 300;
+  letter-spacing: .01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display { font-family: 'Jost', 'Inter', sans-serif; }
+
+/* 优雅细字标题 */
+h1, h2, h3, .title { font-family: 'Jost', 'Inter', sans-serif; font-weight: 300; letter-spacing: .02em; }
+
+/* 字距克制的英文标识 */
+.tracking-wide-2 { letter-spacing: .18em; }
+.tracking-wide-3 { letter-spacing: .28em; }
+
+/* 文字选中色 */
+::selection { background: #2B2B28; color: #FAFAF7; }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: #DCDAD3; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #C7C5BD; }
+
+/* ---------- 链接克制下划线 ---------- */
+.link-quiet {
+  position: relative;
+  color: var(--ink);
+  transition: color .4s var(--ease);
+}
+.link-quiet::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -3px;
+  width: 100%; height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s var(--ease);
+}
+.link-quiet:hover::after { transform: scaleX(1); }
+
+/* ---------- 顶部导航 ---------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(250, 250, 247, .82);
+  backdrop-filter: saturate(1.2) blur(10px);
+  -webkit-backdrop-filter: saturate(1.2) blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color .4s var(--ease);
+}
+.site-header.scrolled { border-bottom-color: var(--line); }
+.site-header a { transition: opacity .4s var(--ease); }
+.site-header a:hover { opacity: .55; }
+
+/* 移动端菜单 */
+.mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .5s var(--ease);
+}
+.mobile-menu.open { max-height: 320px; }
+
+/* ---------- 图片懒加载淡入 ---------- */
+.lazy-img {
+  opacity: 0;
+  transition: opacity 1.2s var(--ease), transform 1.6s var(--ease);
+}
+.lazy-img.loaded { opacity: 1; }
+
+/* ---------- 进入视口的缓慢上浮 ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1.4s var(--ease), transform 1.6s var(--ease);
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* ---------- 作品图卡 ---------- */
+.work-card { cursor: pointer; }
+.work-card .frame {
+  overflow: hidden;
+  background: var(--paper-2);
+}
+.work-card .frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 2.2s var(--ease), filter 1.6s var(--ease);
+}
+.work-card:hover .frame img { transform: scale(1.03); filter: brightness(1.02); }
+
+/* ---------- 页面切换过渡 ---------- */
+main { animation: pageIn 1s var(--ease) both; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- 灯箱 Lightbox ---------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(20, 20, 19, .96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s var(--ease);
+}
+.lightbox.open { opacity: 1; pointer-events: auto; }
+
+.lightbox .lb-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.lightbox .lb-stage.pannable { overflow: auto; cursor: grab; }
+.lightbox .lb-stage.pannable:active { cursor: grabbing; }
+
+.lightbox .lb-img {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity .8s var(--ease), transform .6s var(--ease);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.lightbox .lb-img.loaded { opacity: 1; }
+.lightbox .lb-img.zoomed {
+  max-width: none;
+  max-height: none;
+  width: auto;
+  height: auto;
+  transform: scale(1);
+}
+
+.lightbox .lb-close,
+.lightbox .lb-nav {
+  position: absolute;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, .7);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  cursor: pointer;
+  transition: color .4s var(--ease), transform .4s var(--ease);
+}
+.lightbox .lb-close { top: 1.5rem; right: 2rem; font-size: 2.4rem; line-height: 1; }
+.lightbox .lb-close:hover { color: #fff; transform: rotate(90deg); }
+.lightbox .lb-nav { top: 50%; transform: translateY(-50%); font-size: 2.6rem; }
+.lightbox .lb-prev { left: 1.5rem; }
+.lightbox .lb-next { right: 1.5rem; }
+.lightbox .lb-nav:hover { color: #fff; }
+.lightbox .lb-prev:hover { transform: translateY(-50%) translateX(-4px); }
+.lightbox .lb-next:hover { transform: translateY(-50%) translateX(4px); }
+
+.lightbox .lb-counter {
+  position: absolute;
+  bottom: 1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, .55);
+  font-size: .8rem;
+  letter-spacing: .2em;
+}
+.lightbox .lb-hint {
+  position: absolute;
+  bottom: 1.6rem;
+  right: 2rem;
+  color: rgba(255, 255, 255, .35);
+  font-size: .72rem;
+  letter-spacing: .08em;
+}
+@media (max-width: 640px) {
+  .lightbox .lb-hint { display: none; }
+  .lightbox .lb-nav { font-size: 2rem; }
+  .lightbox .lb-prev { left: .6rem; }
+  .lightbox .lb-next { right: .6rem; }
+}
+
+/* ---------- 详情页元数据细线 ---------- */
+.meta-row {
+  display: flex;
+  gap: 1rem;
+  padding: .9rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.meta-label {
+  flex: 0 0 7.5rem;
+  color: var(--muted);
+  font-size: .72rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  padding-top: .15rem;
+}
+
+/* ---------- 章节呼吸留白 ---------- */
+.section-breathe { padding-block: clamp(4rem, 10vw, 9rem); }
+
+/* ---------- 减少动画偏好 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  .reveal, .lazy-img { opacity: 1 !important; transform: none !important; }
+}
