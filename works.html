@@ -20,53 +20,43 @@
 </head>
 <body class="font-body">
 
-  <header class="site-header">
-    <div class="max-w-[var(--maxw)] mx-auto px-6 sm:px-10">
-      <div class="flex items-center justify-between h-20">
-        <a href="index.html" class="font-display tracking-wide-2 text-sm">
-          <span class="block leading-none">LUCA LIU</span>
-          <span class="block text-[10px] tracking-wide-3 text-muted mt-1">PHOTOGRAPHY</span>
-        </a>
-        <button class="menu-btn" data-menu-toggle aria-label="Open menu">Menu</button>
-      </div>
-    </div>
-  </header>
+  <!-- 固定侧边栏布局 -->
+  <div class="app-layout">
+    <aside class="app-sidebar">
+      <a href="index.html" class="sidebar-logo">LucaLiu Photography</a>
+      <nav class="sidebar-nav">
+        <div class="sidebar-col">
+          <a href="index.html"  data-nav="home">Home</a>
+          <a href="works.html"  data-nav="works">Works</a>
+          <a href="stream.html" data-nav="stream">Stream</a>
+          <a href="about.html"  data-nav="about">About</a>
+        </div>
+        <div class="sidebar-col sub-nav" id="sidebar-series-list">
+          <!-- JS 动态注入作品系列列表 -->
+        </div>
+      </nav>
+      <div class="sidebar-footer">&copy; <span data-year></span> Luca Liu</div>
+    </aside>
 
-  <!-- 川内风格全屏侧边栏 -->
-  <div class="nav-overlay" aria-hidden="true"></div>
-  <aside class="nav-drawer" aria-label="Site navigation">
-    <button class="nav-close" aria-label="Close menu">Close</button>
-    <nav>
-      <a href="index.html"  data-nav="home">Home</a>
-      <a href="works.html"  data-nav="works">Works</a>
-      <a href="stream.html" data-nav="stream">Stream</a>
-      <a href="about.html"  data-nav="about">About</a>
-    </nav>
-    <div class="nav-footer">LucaLiu Photography</div>
-  </aside>
+    <!-- 汉堡菜单按钮（移动端） -->
+    <button class="sidebar-toggle" data-sidebar-toggle aria-label="Toggle menu">Menu</button>
 
-  <main>
-    <section class="pt-28 pb-12 px-6 sm:px-10 max-w-[var(--maxw)] mx-auto">
-      <h1 class="reveal title text-4xl sm:text-6xl">Works</h1>
-      <p class="reveal text-sm text-muted mt-3">Selected series, arranged by category.</p>
-    </section>
+    <main class="app-main">
+      <section class="pt-28 pb-12 px-6 sm:px-10 max-w-[var(--maxw)] mx-auto">
+        <h1 class="reveal title text-4xl sm:text-6xl">Works</h1>
+        <p class="reveal text-sm text-muted mt-3">Selected series, arranged by category.</p>
+      </section>
 
-    <!-- 作品总览：分类次级标题 + 系列封面列表 -->
-    <section class="max-w-[var(--maxw)] mx-auto px-6 sm:px-10 pb-32">
-      <div id="works-list" class="works-list"></div>
-    </section>
-  </main>
+      <!-- 作品总览：分类次级标题 + 系列封面列表 -->
+      <section class="max-w-[var(--maxw)] mx-auto px-6 sm:px-10 pb-32">
+        <div id="works-list" class="works-list"></div>
+      </section>
+    </main>
+  </div>
 
-  <footer class="border-t border-[var(--line)]">
-    <div class="max-w-[var(--maxw)] mx-auto px-6 sm:px-10 py-12 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <p class="text-xs tracking-wide-2 uppercase text-[var(--muted)]">&copy; <span data-year="2024"></span> <span data-author></span></p>
-      <p class="text-xs tracking-wide-2 uppercase text-[var(--muted)]">LucaLiu Photography</p>
-    </div>
-  </footer>
-
-  <script src="js/data.js?v=2"></script>
-  <script src="js/lightbox.js?v=2"></script>
-  <script src="js/app.js?v=2"></script>
-  <script src="js/works.js?v=2"></script>
+  <script src="js/data.js?v=3"></script>
+  <script src="js/lightbox.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
+  <script src="js/works.js?v=3"></script>
 </body>
 </html>

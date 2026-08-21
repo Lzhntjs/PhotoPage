@@ -1,6 +1,6 @@
 /* ==========================================================================
    app.js — 全站共享逻辑
-   职责：移动端菜单、顶栏滚动细线、版权年份、图片懒加载淡入、进入视口动画
+   职责：侧边栏渲染（作品系列列表）、移动端汉堡菜单、当前页高亮、版权年份、图片懒加载、进入视口动画
    说明：所有页面统一引入，依赖 data.js 已先加载
    ========================================================================== */
 (function () {
@@ -8,7 +8,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
 
-    /* ---- 版权年份自动计算（起始年-当前年） ---- */
+    /* ---- 版权年份自动计算 ---- */
     var yearEls = document.querySelectorAll('[data-year]');
     var now = new Date().getFullYear();
     yearEls.forEach(function (el) {
@@ -21,66 +21,64 @@
       el.textContent = (window.SITE && window.SITE.author) || '';
     });
 
-    /* ---- 导航当前页高亮（适配 cleanUrls + /works/:id rewrite） ---- */
+    /* ---- 动态渲染作品系列列表到侧边栏 ---- */
+    var seriesList = document.getElementById('sidebar-series-list');
+    if (seriesList && window.Works) {
+      var series = window.Works.allSeries();
+      var html = '';
+      series.forEach(function (s) {
+        html += '<a href="series.html?id=' + encodeURIComponent(s.id) + '" data-series="' + escapeAttr(s.id) + '">' + escapeHtml(s.title) + '</a>';
+      });
+      seriesList.innerHTML = html;
+
+      // 高亮当前系列
+      var params = new URLSearchParams(location.search);
+      var currentId = params.get('id');
+      if (currentId) {
+        var currentLink = seriesList.querySelector('[data-series="' + currentId + '"]');
+        if (currentLink) {
+          currentLink.classList.add('active');
+          currentLink.setAttribute('aria-current', 'page');
+        }
+      }
+    }
+
+    /* ---- 导航当前页高亮 ---- */
     var path = location.pathname.replace(/\/+$/, '');
     var file = path.split('/').pop() || 'index.html';
     document.querySelectorAll('[data-nav]').forEach(function (a) {
       var target = a.getAttribute('data-nav');
       var isActive = false;
       if (target === 'home')    isActive = (file === 'index.html' || file === '' || file === 'index');
-      else if (target === 'works')  isActive = (file === 'works.html' || file === 'works' || file === 'series.html' || path.indexOf('/works/') === 0);
+      else if (target === 'works')  isActive = (file === 'works.html' || file === 'works' || file === 'series.html' || file === 'series');
       else if (target === 'stream') isActive = (file === 'stream.html' || file === 'stream');
       else if (target === 'about')  isActive = (file === 'about.html' || file === 'about');
       if (isActive) {
-        a.classList.add('opacity-60');
+        a.classList.add('active');
         a.setAttribute('aria-current', 'page');
       }
     });
 
-    /* ---- 顶栏滚动时出现细分割线 ---- */
-    var header = document.querySelector('.site-header');
-    if (header) {
-      var onScroll = function () {
-        header.classList.toggle('scrolled', window.scrollY > 8);
-      };
-      onScroll();
-      window.addEventListener('scroll', onScroll, { passive: true });
-    }
-
-    /* ---- 川内风格侧边栏：Menu 开 / Close 关 / 遮罩关 / ESC 关 ---- */
-    var drawer  = document.querySelector('.nav-drawer');
-    var overlay = document.querySelector('.nav-overlay');
-    var openBtn = document.querySelector('[data-menu-toggle]');
-    var closeBtn = drawer ? drawer.querySelector('.nav-close') : null;
-
-    function openNav() {
-      if (!drawer || !overlay) return;
-      drawer.classList.add('open');
-      overlay.classList.add('open');
-      document.body.classList.add('nav-open');
-    }
-    function closeNav() {
-      if (!drawer || !overlay) return;
-      drawer.classList.remove('open');
-      overlay.classList.remove('open');
-      document.body.classList.remove('nav-open');
-    }
-
-    if (openBtn)   openBtn.addEventListener('click', openNav);
-    if (closeBtn)  closeBtn.addEventListener('click', closeNav);
-    if (overlay)   overlay.addEventListener('click', closeNav);
-    // 点侧边栏内任一导航项后自动收起
-    if (drawer) {
-      drawer.querySelectorAll('nav a').forEach(function (a) {
-        a.addEventListener('click', closeNav);
+    /* ---- 移动端汉堡菜单：侧边栏展开/收起 ---- */
+    var toggleBtn = document.querySelector('[data-sidebar-toggle]');
+    var sidebar = document.querySelector('.app-sidebar');
+    if (toggleBtn && sidebar) {
+      toggleBtn.addEventListener('click', function () {
+        sidebar.classList.toggle('mobile-open');
+        toggleBtn.textContent = sidebar.classList.contains('mobile-open') ? 'Close' : 'Menu';
+      });
+      // 点击导航项后自动收起（移动端）
+      sidebar.querySelectorAll('.sidebar-nav a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          if (sidebar.classList.contains('mobile-open')) {
+            sidebar.classList.remove('mobile-open');
+            toggleBtn.textContent = 'Menu';
+          }
+        });
       });
     }
-    // ESC 键关闭
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && drawer && drawer.classList.contains('open')) closeNav();
-    });
 
-    /* ---- 图片懒加载淡入：依赖原生 loading=lazy + IntersectionObserver ---- */
+    /* ---- 图片懒加载淡入 ---- */
     var lazyImgs = document.querySelectorAll('img.lazy-img[data-src]');
     if ('IntersectionObserver' in window && lazyImgs.length) {
       var io = new IntersectionObserver(function (entries, obs) {
@@ -91,7 +89,6 @@
             img.addEventListener('load', function () { img.classList.add('loaded'); }, { once: true });
             img.src = img.dataset.src;
             img.removeAttribute('data-src');
-            // 兜底：若缓存命中 load 已触发
             if (img.complete) img.classList.add('loaded');
             obs.unobserve(img);
           }
@@ -99,7 +96,6 @@
       }, { rootMargin: '200px 0px' });
       lazyImgs.forEach(function (img) { io.observe(img); });
     } else {
-      // 不支持时直接加载
       lazyImgs.forEach(function (img) {
         img.src = img.dataset.src;
         img.classList.add('loaded');
@@ -122,4 +118,7 @@
       reveals.forEach(function (el) { el.classList.add('in'); });
     }
   });
+
+  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'; }); }
+  function escapeAttr(s) { return escapeHtml(s).replace(/"/g, '&quot;'); }
 })();
