@@ -22,11 +22,10 @@
 
       html += '<div class="works-list">';
       series.forEach(function (s, i) {
-        var href;
-        // 本地预览（无 rewrite）用 series.html?id=；Vercel 上用 /works/<id>
-        // 统一用 /works/<id>，本地 python server 也能解析（series.html 同目录）
-        // 为兼容本地 file:// 与 python server，这里用相对路径 works/<id>
-        href = 'works/' + encodeURIComponent(s.id);
+        // 用 series.html?id= 而非 /works/<id>：
+        // Vercel 的 filesystem 检查在 rewrites 之前，works.html 存在会导致 /works/<id> 被消费成 404
+        // series.html?id= 在本地与线上行为完全一致，cleanUrls 会自动把 URL 美化为 /series?id=
+        var href = 'series.html?id=' + encodeURIComponent(s.id);
         html +=
           '<a href="' + href + '" class="series-card reveal block" style="transition-delay:' + (i * 80) + 'ms">' +
             '<div class="frame">' +

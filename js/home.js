@@ -21,7 +21,7 @@
 
     list.forEach(function (s, i) {
       var wrap = document.createElement('a');
-      wrap.href = 'works/' + encodeURIComponent(s.id);
+      wrap.href = 'series.html?id=' + encodeURIComponent(s.id);
       wrap.className = 'series-card reveal block';
       wrap.style.transitionDelay = (i * 90) + 'ms';
       wrap.innerHTML =

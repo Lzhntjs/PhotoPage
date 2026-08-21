@@ -18,7 +18,7 @@
       root.innerHTML =
         '<div class="text-center section-breathe">' +
           '<p class="title text-2xl text-[var(--muted)]">Series not found.</p>' +
-          '<a href="works.html" class="back-link inline-block mt-6">&larr; Back to Works</a>' +
+          '<a href="works" class="back-link inline-block mt-6">&larr; Back to Works</a>' +
         '</div>';
       return;
     }
@@ -43,7 +43,7 @@
     });
 
     root.innerHTML =
-      '<a href="works.html" class="back-link reveal">&larr; Works</a>' +
+      '<a href="works" class="back-link reveal">&larr; Works</a>' +
       '<div class="reveal mt-8">' +
         '<h1 class="title text-4xl sm:text-6xl">' + escapeHtml(s.title) + '</h1>' +
         '<div class="year mt-2 text-sm text-muted">' + escapeHtml(String(s.year)) + '</div>' +
