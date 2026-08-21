@@ -47,18 +47,38 @@
       window.addEventListener('scroll', onScroll, { passive: true });
     }
 
-    /* ---- 移动端菜单开关 ---- */
-    var toggle = document.querySelector('[data-menu-toggle]');
-    var menu = document.querySelector('[data-mobile-menu]');
-    if (toggle && menu) {
-      toggle.addEventListener('click', function () {
-        menu.classList.toggle('open');
-      });
-      // 点击菜单内链接后自动收起
-      menu.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', function () { menu.classList.remove('open'); });
+    /* ---- 川内风格侧边栏：Menu 开 / Close 关 / 遮罩关 / ESC 关 ---- */
+    var drawer  = document.querySelector('.nav-drawer');
+    var overlay = document.querySelector('.nav-overlay');
+    var openBtn = document.querySelector('[data-menu-toggle]');
+    var closeBtn = drawer ? drawer.querySelector('.nav-close') : null;
+
+    function openNav() {
+      if (!drawer || !overlay) return;
+      drawer.classList.add('open');
+      overlay.classList.add('open');
+      document.body.classList.add('nav-open');
+    }
+    function closeNav() {
+      if (!drawer || !overlay) return;
+      drawer.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.classList.remove('nav-open');
+    }
+
+    if (openBtn)   openBtn.addEventListener('click', openNav);
+    if (closeBtn)  closeBtn.addEventListener('click', closeNav);
+    if (overlay)   overlay.addEventListener('click', closeNav);
+    // 点侧边栏内任一导航项后自动收起
+    if (drawer) {
+      drawer.querySelectorAll('nav a').forEach(function (a) {
+        a.addEventListener('click', closeNav);
       });
     }
+    // ESC 键关闭
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && drawer && drawer.classList.contains('open')) closeNav();
+    });
 
     /* ---- 图片懒加载淡入：依赖原生 loading=lazy + IntersectionObserver ---- */
     var lazyImgs = document.querySelectorAll('img.lazy-img[data-src]');
