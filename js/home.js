@@ -1,72 +1,147 @@
 /* ==========================================================================
-   home.js — 首页精选系列渲染
-   布局：精选系列封面满宽大图，图下左对齐标题+年份（与 Works 列表同款，川内风格）
+   home.js — 首页：左侧导航 + 右侧全屏单图
    ========================================================================== */
 (function () {
   'use strict';
 
+  var state = {
+    photos: [],
+    currentIdx: 0,
+    isAnimating: false
+  };
+
   document.addEventListener('DOMContentLoaded', function () {
-    var container = document.getElementById('featured');
-    if (!container) return;
+    if (!window.Works) return;
 
-    var list = (window.Works && window.Works.featured()) || [];
-    if (!list.length) {
-      // 无精选时退化为全部系列
-      list = (window.Works && window.Works.allSeries()) || [];
-    }
-    if (!list.length) {
-      container.innerHTML = '<p class="text-center text-muted text-sm">No featured works yet.</p>';
-      return;
-    }
-
-    list.forEach(function (s, i) {
-      var wrap = document.createElement('a');
-      wrap.href = 'series.html?id=' + encodeURIComponent(s.id);
-      wrap.className = 'series-card reveal block';
-      wrap.style.transitionDelay = (i * 90) + 'ms';
-      wrap.innerHTML =
-        '<div class="frame">' +
-          '<img class="lazy-img" loading="lazy" alt="' + escapeAttr(s.title) + '" data-src="' + escapeAttr(s.cover) + '" />' +
-        '</div>' +
-        '<div class="series-meta">' +
-          '<div class="title">' + escapeHtml(s.title) + '</div>' +
-          '<div class="year">' + escapeHtml(String(s.year)) + '</div>' +
-        '</div>';
-      container.appendChild(wrap);
+    // 收集所有作品的第一张照片作为轮播图
+    var allSeries = window.Works.allSeries();
+    allSeries.forEach(function (s) {
+      if (s.photos && s.photos.length) {
+        state.photos.push({
+          src: s.photos[0].src || s.cover,
+          seriesId: s.id,
+          title: s.title,
+          year: s.year
+        });
+      }
     });
 
-    observe(container);
+    if (!state.photos.length) return;
+
+    showPhoto(0, true);
+    bindEvents();
   });
 
-  function observe(root) {
-    if (!('IntersectionObserver' in window)) {
-      root.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
-      root.querySelectorAll('img.lazy-img[data-src]').forEach(function (img) { loadImg(img); });
-      return;
+  function showPhoto(idx, instant) {
+    state.currentIdx = idx;
+    var photo = state.photos[idx];
+    if (!photo) return;
+
+    // 更新标题信息
+    var titleEl = document.getElementById('home-series-title');
+    var yearEl = document.getElementById('home-series-year');
+    if (titleEl) titleEl.textContent = photo.title;
+    if (yearEl) yearEl.textContent = String(photo.year);
+
+    // 切换图片（无缝交叉淡入淡出）
+    var img = document.getElementById('home-stage-img');
+    var overlay = document.getElementById('home-stage-img-overlay');
+
+    if (!instant && !state.isAnimating) {
+      state.isAnimating = true;
+      
+      // 预加载新图片到 overlay
+      var tempImg = new Image();
+      tempImg.onload = function () {
+        overlay.src = photo.src;
+        // 同步执行：主图淡出 + overlay 淡入
+        img.classList.add('fade-out');
+        overlay.classList.add('fade-in');
+
+        // 600ms 后完成切换
+        setTimeout(function () {
+          img.src = photo.src;
+          img.classList.remove('fade-out');
+          overlay.classList.remove('fade-in');
+          overlay.src = '';
+          state.isAnimating = false;
+        }, 600);
+      };
+      tempImg.src = photo.src;
+    } else {
+      img.src = photo.src;
     }
-    var ro = new IntersectionObserver(function (entries, obs) {
-      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
-    }, { threshold: .1 });
-    root.querySelectorAll('.reveal').forEach(function (el) { ro.observe(el); });
 
-    var io = new IntersectionObserver(function (entries, obs) {
-      entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        loadImg(e.target);
-        obs.unobserve(e.target);
+    updateArrows();
+  }
+
+  function nextPhoto() {
+    if (state.photos.length < 2) return;
+    var next = (state.currentIdx + 1) % state.photos.length;
+    showPhoto(next);
+  }
+
+  function prevPhoto() {
+    if (state.photos.length < 2) return;
+    var prev = (state.currentIdx - 1 + state.photos.length) % state.photos.length;
+    showPhoto(prev);
+  }
+
+  function updateArrows() {
+    var hasMultiple = state.photos.length > 1;
+    var prev = document.getElementById('home-prev');
+    var next = document.getElementById('home-next');
+    if (prev) prev.style.opacity = hasMultiple ? '1' : '0.3';
+    if (next) next.style.opacity = hasMultiple ? '1' : '0.3';
+  }
+
+  function bindEvents() {
+    document.getElementById('home-prev').addEventListener('click', function(e) {
+      e.stopPropagation();
+      prevPhoto();
+    });
+    document.getElementById('home-next').addEventListener('click', function(e) {
+      e.stopPropagation();
+      nextPhoto();
+    });
+
+    // 点击图片切换下一张
+    var img = document.getElementById('home-stage-img');
+    if (img) {
+      img.addEventListener('click', function(e) {
+        e.stopPropagation();
+        nextPhoto();
       });
-    }, { rootMargin: '300px 0px' });
-    root.querySelectorAll('img.lazy-img[data-src]').forEach(function (el) { io.observe(el); });
-  }
+    }
+    var imgOverlay = document.getElementById('home-stage-img-overlay');
+    if (imgOverlay) {
+      imgOverlay.addEventListener('click', function(e) {
+        e.stopPropagation();
+        nextPhoto();
+      });
+    }
 
-  function loadImg(img) {
-    img.onerror = function () { this.onerror = null; this.src = window.IMG_FALLBACK; this.classList.add('loaded'); };
-    img.addEventListener('load', function () { img.classList.add('loaded'); }, { once: true });
-    img.src = img.dataset.src;
-    img.removeAttribute('data-src');
-    if (img.complete && img.naturalWidth) img.classList.add('loaded');
-  }
+    // 键盘支持
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') prevPhoto();
+      else if (e.key === 'ArrowRight') nextPhoto();
+    });
 
-  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'; }); }
-  function escapeAttr(s) { return escapeHtml(s).replace(/"/g, '&quot;'); }
+    // 触摸滑动支持
+    var stage = document.querySelector('.home-stage');
+    if (stage) {
+      var touchStartX = 0;
+      stage.addEventListener('touchstart', function (e) {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+
+      stage.addEventListener('touchend', function (e) {
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 60) {
+          if (dx < 0) nextPhoto();
+          else prevPhoto();
+        }
+      });
+    }
+  }
 })();

@@ -47,15 +47,15 @@ window.SERIES = [
     "featured": true,
     "photos": [
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/noncata-01.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/noncata-01.jpg",
         "caption": ""
       },
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/noncata-02.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/noncata-02.jpg",
         "caption": ""
       },
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/noncata-03.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/noncata-03.jpg",
         "caption": ""
       }
     ]
@@ -75,15 +75,15 @@ window.SERIES = [
     "featured": false,
     "photos": [
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/randomlife-01.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/randomlife-01.jpg",
         "caption": ""
       },
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/randomlife-02.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/randomlife-02.jpg",
         "caption": ""
       },
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/randomlife-03.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/randomlife-03.jpg",
         "caption": ""
       }
     ]
@@ -103,23 +103,23 @@ window.SERIES = [
     "featured": false,
     "photos": [
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-01.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-01.jpg",
         "caption": ""
       },
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-02.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-02.jpg",
         "caption": ""
       },
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-03.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-03.jpg",
         "caption": ""
       },
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-04.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-04.jpg",
         "caption": ""
       },
       {
-        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-05.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-05.jpg",
         "caption": ""
       }
     ]

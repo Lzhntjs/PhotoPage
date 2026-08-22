@@ -201,16 +201,16 @@ def main():
                 if not series_date:
                     series_date = d
                 if r2_base:
-                    # 生产模式：cover/full/photos 都走 R2
-                    #   cover/photos 缩略图 → {r2_base}/thumbs/{pid}.jpg  （需把 images/thumbnails/ 上传到 R2 的 thumbs/）
-                    #   full 展示大图      → {r2_base}/{pid}.jpg          （需把 r2-upload/ 上传到 R2 根目录）
+                    # 生产模式：cover 走 R2 缩略图，photos/full 走 R2 高清原图
+                    #   cover 缩略图 → {r2_base}/thumbs/{pid}.jpg  （需把 images/thumbnails/ 上传到 R2 的 thumbs/）
+                    #   photos/full  → {r2_base}/{pid}.jpg          （需把 r2-upload/ 上传到 R2 根目录）
                     thumb_url = "{}/thumbs/{}.jpg".format(r2_base, pid)
                     full_url = "{}/{}.jpg".format(r2_base, pid)
                 else:
                     # 占位模式：仓库不存图，指向本地路径，文件不存在时前端 onerror 显示柔和占位块
                     thumb_url = "images/thumbnails/{}.jpg".format(pid)
                     full_url = "images/thumbnails/{}.jpg".format(pid)
-                photos.append({ "src": thumb_url, "caption": "" })
+                photos.append({ "src": full_url, "caption": "" })
                 if not cover_set:
                     cover = thumb_url
                     full = full_url
