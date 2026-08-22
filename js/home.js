@@ -50,28 +50,42 @@
     if (!instant && !state.isAnimating) {
       state.isAnimating = true;
       
-      // 预加载新图片到 overlay
+      // 先把新图片设置到 overlay（保持 opacity: 0）
+      overlay.src = photo.src;
+      overlay.style.opacity = '0';
+      
+      // 强制浏览器预加载图片（读取尺寸触发加载）
       var tempImg = new Image();
       tempImg.onload = function () {
-        overlay.src = photo.src;
-        overlay.style.opacity = '0';
-        // 强制浏览器重排
+        // 图片已缓存，现在可以安全切换
+        // 强制浏览器重排，确保 opacity: 0 生效
         void overlay.offsetWidth;
+        
         // 同步执行：主图淡出 + overlay 淡入
         img.style.opacity = '0';
         overlay.style.opacity = '1';
 
         // 600ms 后完成切换
         setTimeout(function () {
-          // 交换图片：把 overlay 的 src 复制给主图，然后同时显示主图
+          // 关键：先设置 src，但保持 opacity 不变（主图仍然是 0）
+          // 这样浏览器在后台解码图片，用户看不到
+          var oldSrc = img.src;
           img.src = photo.src;
-          img.style.opacity = '1';
-          overlay.style.opacity = '0';
           
-          // 等一个帧后清空 overlay
+          // 等浏览器处理完 src 后，在下一帧显示主图
           requestAnimationFrame(function () {
-            overlay.src = '';
-            state.isAnimating = false;
+            // 现在主图的新 src 已经准备好，可以安全显示
+            img.style.opacity = '1';
+            
+            // 再等一帧，淡出 overlay 并清理
+            requestAnimationFrame(function () {
+              overlay.style.opacity = '0';
+              // 确保主图和 overlay 的 src 相同后再清空 overlay
+              if (img.src === photo.src) {
+                overlay.src = '';
+              }
+              state.isAnimating = false;
+            });
           });
         }, 600);
       };
@@ -80,6 +94,7 @@
       img.src = photo.src;
       img.style.opacity = '1';
       overlay.style.opacity = '0';
+      overlay.src = '';
     }
 
     updateArrows();
