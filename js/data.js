@@ -33,33 +33,57 @@
 
 window.SERIES = [
   {
-    "id": "film",
-    "title": "Film",
-    "year": 2026,
-    "category": "Street",
-    "date": "2026-08-20",
+    "id": "noncata",
+    "title": "Noncata",
+    "year": 2025,
+    "category": "Travel",
+    "date": "2025-02-20",
     "location": "",
     "camera": "",
     "lens": "",
     "notes": "",
-    "cover": "images/thumbnails/film-01.jpg",
-    "full": "images/thumbnails/film-01.jpg",
+    "cover": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/noncata-01.jpg",
+    "full": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/noncata-01.jpg",
     "featured": true,
     "photos": [
       {
-        "src": "images/thumbnails/film-01.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/noncata-01.jpg",
         "caption": ""
       },
       {
-        "src": "images/thumbnails/film-02.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/noncata-02.jpg",
         "caption": ""
       },
       {
-        "src": "images/thumbnails/film-03.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/noncata-03.jpg",
+        "caption": ""
+      }
+    ]
+  },
+  {
+    "id": "randomlife",
+    "title": "RandomLife",
+    "year": 2025,
+    "category": "Travel",
+    "date": "2025-04-20",
+    "location": "",
+    "camera": "",
+    "lens": "",
+    "notes": "",
+    "cover": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/randomlife-01.jpg",
+    "full": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/randomlife-01.jpg",
+    "featured": false,
+    "photos": [
+      {
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/randomlife-01.jpg",
         "caption": ""
       },
       {
-        "src": "images/thumbnails/film-04.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/randomlife-02.jpg",
+        "caption": ""
+      },
+      {
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/randomlife-03.jpg",
         "caption": ""
       }
     ]
@@ -67,67 +91,35 @@ window.SERIES = [
   {
     "id": "sydney",
     "title": "Sydney",
-    "year": 2026,
+    "year": 2015,
     "category": "Travel",
-    "date": "2026-08-20",
+    "date": "2015-01-06",
     "location": "",
     "camera": "",
     "lens": "",
     "notes": "",
-    "cover": "images/thumbnails/sydney-01.jpg",
-    "full": "images/thumbnails/sydney-01.jpg",
-    "featured": true,
-    "photos": [
-      {
-        "src": "images/thumbnails/sydney-01.jpg",
-        "caption": ""
-      },
-      {
-        "src": "images/thumbnails/sydney-02.jpg",
-        "caption": ""
-      },
-      {
-        "src": "images/thumbnails/sydney-03.jpg",
-        "caption": ""
-      },
-      {
-        "src": "images/thumbnails/sydney-04.jpg",
-        "caption": ""
-      },
-      {
-        "src": "images/thumbnails/sydney-05.jpg",
-        "caption": ""
-      },
-      {
-        "src": "images/thumbnails/sydney-06.jpg",
-        "caption": ""
-      }
-    ]
-  },
-  {
-    "id": "takamatsu",
-    "title": "Takamatsu",
-    "year": 2026,
-    "category": "Travel",
-    "date": "2026-08-20",
-    "location": "",
-    "camera": "",
-    "lens": "",
-    "notes": "",
-    "cover": "images/thumbnails/takamatsu-01.jpg",
-    "full": "images/thumbnails/takamatsu-01.jpg",
+    "cover": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-01.jpg",
+    "full": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-01.jpg",
     "featured": false,
     "photos": [
       {
-        "src": "images/thumbnails/takamatsu-01.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-01.jpg",
         "caption": ""
       },
       {
-        "src": "images/thumbnails/takamatsu-02.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-02.jpg",
         "caption": ""
       },
       {
-        "src": "images/thumbnails/takamatsu-03.jpg",
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-03.jpg",
+        "caption": ""
+      },
+      {
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-04.jpg",
+        "caption": ""
+      },
+      {
+        "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-05.jpg",
         "caption": ""
       }
     ]

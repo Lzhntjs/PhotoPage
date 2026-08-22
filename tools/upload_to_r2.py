@@ -27,10 +27,10 @@ import sys
 from pathlib import Path
 
 # ====== 在这里填入你的 R2 凭证（或用环境变量 R2_ACCOUNT_ID 等） ======
-ACCOUNT_ID    = os.environ.get("R2_ACCOUNT_ID",    "")        # Cloudflare Account ID
-ACCESS_KEY    = os.environ.get("R2_ACCESS_KEY",    "")        # Access Key ID
-SECRET_KEY    = os.environ.get("R2_SECRET_KEY",     "")        # Secret Access Key
-BUCKET        = os.environ.get("R2_BUCKET",        "lucaliu-photos")  # bucket 名
+ACCOUNT_ID    = os.environ.get("R2_ACCOUNT_ID",    "")
+ACCESS_KEY    = os.environ.get("R2_ACCESS_KEY",    "")
+SECRET_KEY    = os.environ.get("R2_SECRET_KEY",     "")
+BUCKET        = os.environ.get("R2_BUCKET",        "lucaliu-photos")
 # =====================================================================
 
 ROOT = Path(__file__).resolve().parent.parent
