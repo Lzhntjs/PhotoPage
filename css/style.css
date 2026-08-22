@@ -791,12 +791,6 @@ main { animation: pageIn 1s var(--ease) both; }
   pointer-events: none;
   transition: opacity .6s var(--ease);
 }
-.home-stage-img.fade-out {
-  opacity: 0;
-}
-.home-stage-img.overlay.fade-in {
-  opacity: 1;
-}
 
 /* 图片信息（左下角，半透明背景） */
 .home-stage-info {

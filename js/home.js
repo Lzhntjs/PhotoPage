@@ -54,22 +54,32 @@
       var tempImg = new Image();
       tempImg.onload = function () {
         overlay.src = photo.src;
+        overlay.style.opacity = '0';
+        // 强制浏览器重排
+        void overlay.offsetWidth;
         // 同步执行：主图淡出 + overlay 淡入
-        img.classList.add('fade-out');
-        overlay.classList.add('fade-in');
+        img.style.opacity = '0';
+        overlay.style.opacity = '1';
 
         // 600ms 后完成切换
         setTimeout(function () {
+          // 交换图片：把 overlay 的 src 复制给主图，然后同时显示主图
           img.src = photo.src;
-          img.classList.remove('fade-out');
-          overlay.classList.remove('fade-in');
-          overlay.src = '';
-          state.isAnimating = false;
+          img.style.opacity = '1';
+          overlay.style.opacity = '0';
+          
+          // 等一个帧后清空 overlay
+          requestAnimationFrame(function () {
+            overlay.src = '';
+            state.isAnimating = false;
+          });
         }, 600);
       };
       tempImg.src = photo.src;
     } else {
       img.src = photo.src;
+      img.style.opacity = '1';
+      overlay.style.opacity = '0';
     }
 
     updateArrows();
