@@ -7,7 +7,8 @@
   var state = {
     photos: [],
     currentIdx: 0,
-    isAnimating: false
+    isAnimating: false,
+    activeIdx: 0  // 当前显示的是哪个 img 元素（0 = home-stage-img, 1 = home-stage-img-overlay）
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -32,6 +33,13 @@
     bindEvents();
   });
 
+  function getImgs() {
+    return [
+      document.getElementById('home-stage-img'),       // 元素 0
+      document.getElementById('home-stage-img-overlay') // 元素 1
+    ];
+  }
+
   function showPhoto(idx, instant) {
     state.currentIdx = idx;
     var photo = state.photos[idx];
@@ -43,58 +51,50 @@
     if (titleEl) titleEl.textContent = photo.title;
     if (yearEl) yearEl.textContent = String(photo.year);
 
-    // 切换图片（无缝交叉淡入淡出）
-    var img = document.getElementById('home-stage-img');
-    var overlay = document.getElementById('home-stage-img-overlay');
+    var imgs = getImgs();
+    var activeImg = imgs[state.activeIdx];
+    var hiddenImg = imgs[1 - state.activeIdx];
 
-    if (!instant && !state.isAnimating) {
+    if (instant) {
+      // 初始化：直接设置两个图片
+      activeImg.src = photo.src;
+      activeImg.style.opacity = '1';
+      hiddenImg.src = '';
+      hiddenImg.style.opacity = '0';
+    } else if (!state.isAnimating && activeImg.src !== photo.src) {
       state.isAnimating = true;
-      
-      // 先把新图片设置到 overlay（保持 opacity: 0）
-      overlay.src = photo.src;
-      overlay.style.opacity = '0';
-      
-      // 强制浏览器预加载图片（读取尺寸触发加载）
-      var tempImg = new Image();
-      tempImg.onload = function () {
-        // 图片已缓存，现在可以安全切换
+
+      // 关键：只修改"隐藏"图片的 src，可见图片的 src 永远不变
+      hiddenImg.src = photo.src;
+      hiddenImg.style.opacity = '0';
+
+      // 预加载确保图片已缓存
+      var preload = new Image();
+      preload.onload = function () {
         // 强制浏览器重排，确保 opacity: 0 生效
-        void overlay.offsetWidth;
-        
-        // 同步执行：主图淡出 + overlay 淡入
-        img.style.opacity = '0';
-        overlay.style.opacity = '1';
+        void hiddenImg.offsetWidth;
+
+        // 交叉淡入淡出：隐藏图片淡入，显示图片淡出
+        activeImg.style.opacity = '0';
+        hiddenImg.style.opacity = '1';
 
         // 600ms 后完成切换
         setTimeout(function () {
-          // 关键：先设置 src，但保持 opacity 不变（主图仍然是 0）
-          // 这样浏览器在后台解码图片，用户看不到
-          var oldSrc = img.src;
-          img.src = photo.src;
+          // 交换角色：刚才淡入的图片成为新的 active
+          state.activeIdx = 1 - state.activeIdx;
           
-          // 等浏览器处理完 src 后，在下一帧显示主图
-          requestAnimationFrame(function () {
-            // 现在主图的新 src 已经准备好，可以安全显示
-            img.style.opacity = '1';
-            
-            // 再等一帧，淡出 overlay 并清理
-            requestAnimationFrame(function () {
-              overlay.style.opacity = '0';
-              // 确保主图和 overlay 的 src 相同后再清空 overlay
-              if (img.src === photo.src) {
-                overlay.src = '';
-              }
-              state.isAnimating = false;
-            });
-          });
+          // 现在新的 active 就是 hiddenImg，它的 src 已经是新图片
+          // 新的 hidden 是原来的 active，它还保留着旧 src
+          
+          // 清理旧图片（现在是 hidden）
+          var newHidden = imgs[1 - state.activeIdx];
+          newHidden.src = '';
+          newHidden.style.opacity = '0';
+          
+          state.isAnimating = false;
         }, 600);
       };
-      tempImg.src = photo.src;
-    } else {
-      img.src = photo.src;
-      img.style.opacity = '1';
-      overlay.style.opacity = '0';
-      overlay.src = '';
+      preload.src = photo.src;
     }
 
     updateArrows();
@@ -130,17 +130,10 @@
       nextPhoto();
     });
 
-    // 点击图片切换下一张
-    var img = document.getElementById('home-stage-img');
-    if (img) {
-      img.addEventListener('click', function(e) {
-        e.stopPropagation();
-        nextPhoto();
-      });
-    }
-    var imgOverlay = document.getElementById('home-stage-img-overlay');
-    if (imgOverlay) {
-      imgOverlay.addEventListener('click', function(e) {
+    // 点击图片切换 - 绑定到包裹容器上，这样两个图片元素都能响应
+    var imgWrap = document.querySelector('.home-stage-img-wrap');
+    if (imgWrap) {
+      imgWrap.addEventListener('click', function(e) {
         e.stopPropagation();
         nextPhoto();
       });

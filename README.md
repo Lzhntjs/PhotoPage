@@ -4,8 +4,8 @@
 
 - 架构：HTML5 + CSS3 + 原生 JS + Tailwind CSS（CDN，零构建）
 - 无后端、无数据库、无服务器、无实时服务依赖 → 极致稳定、零运维
-- 混合图片存储：仓库存缩略图，Cloudflare R2 存高清大图
-- 托管：Vercel 自动部署；DNS/CDN/HTTPS：Cloudflare
+- 混合图片存储：Cloudflare R2 存缩略图和高清大图
+- 托管：Cloudflare Pages 自动部署（国内访问友好）
 
 ---
 
@@ -13,403 +13,487 @@
 
 1. [项目结构](#1-项目结构)
 2. [本地预览](#2-本地预览)
-3. [部署教程（从零开始）](#3-部署教程从零开始)
-   - 3.1 注册账号
-   - 3.2 上传代码到 GitHub
-   - 3.3 Vercel 关联部署（方案一：免费子域名）
-   - 3.4 Cloudflare R2 存储桶创建 + 公共访问
-   - 3.5 R2 图片防盗链配置
-   - 3.6 替换占位图为你的真实作品
-   - 3.7 绑定自定义域名（方案二：正式作品集）
-   - 3.8 Cloudflare DNS 解析与 HTTPS
-4. [两套域名方案对比](#4-两套域名方案对比)
-5. [运维手册](#5-运维手册)
-   - 5.1 新增作品
-   - 5.2 删除作品
-   - 5.3 修改作品信息
-   - 5.4 调整网站风格
-6. [后续迭代指令模板](#6-后续迭代指令模板)
-7. [免费边界与避坑清单](#7-免费边界与避坑清单)
-8. [Cloudflare R2 计费说明](#8-cloudflare-r2-计费说明)
-9. [免费 / 付费环节一览](#9-免费--付费环节一览)
+3. [部署与技术栈](#3-部署与技术栈)
+4. [R2 图片存储规则](#4-r2-图片存储规则)
+5. [日常维护手册](#5-日常维护手册)
+   - 5.1 新增图片到已有系列
+   - 5.2 创建新系列/新分类
+   - 5.3 删除图片或系列
+   - 5.4 修改作品信息
+   - 5.5 调整网站风格
+6. [完整工作流示例](#6-完整工作流示例)
+   - 6.1 处理一批新照片的完整流程
+7. [R2 管理最佳实践](#7-r2-管理最佳实践)
+8. [免费额度与避坑清单](#8-免费额度与避坑清单)
 
 ---
 
 ## 1. 项目结构
 
 ```
-photoweb/
-├── index.html          首页（精选作品，纵向堆叠大图）
-├── gallery.html        相册页（分类筛选 + 瀑布流）
-├── work.html           作品详情页（大图 + 元数据 + 灯箱）
-├── about.html          关于页
-├── vercel.json         Vercel 配置（cleanUrls / 缓存 / 安全头）
+photopage/
+├── index.html              首页（全屏轮播图，点击切换）
+├── works.html              作品列表页（分类筛选 + 网格）
+├── series.html             系列详情页（大图浏览）
+├── stream.html             时间线流（单张滚动）
+├── about.html              关于页
 ├── css/
-│   └── style.css       设计令牌、字体、动画、灯箱样式
+│   └── style.css           全局样式、响应式设计、动画
 ├── js/
-│   ├── data.js         ★ 作品元数据“数据库”（你只需改这一个文件）
-│   ├── app.js          全站共享逻辑（菜单/懒加载/版权年份）
-│   ├── lightbox.js     全屏灯箱（缩放/左右切换/移动端滑动）
-│   ├── home.js         首页精选渲染
-│   ├── gallery.js      相册页渲染
-│   └── work.js         详情页渲染
-└── images/
-    └── thumbnails/     仓库内存放的缩略图（小图，长边≤1920px）
+│   ├── data.js             ★ 作品元数据"数据库"（日常主要维护这个）
+│   ├── home.js             首页逻辑（图片切换、键盘/触摸支持）
+│   ├── works.js            作品列表页逻辑
+│   ├── series.js           系列详情页逻辑
+│   ├── stream.js           时间线流逻辑
+│   ├── lightbox.js         全屏灯箱
+│   └── app.js              全站共享逻辑
+├── tools/
+│   ├── prepare_images.py   ★ 批量处理照片脚本（缩略图+大图+更新data.js）
+│   └── upload_to_r2.py     ★ 批量上传到R2脚本
+├── images/
+│   └── thumbnails/         本地缩略图目录（临时使用）
+├── photofile/              ★ 原图存放目录（你放照片的地方）
+└── .gitignore
 ```
 
-> 你日常只接触两个东西：`js/data.js`（作品数据）和 `images/thumbnails/`（缩略图）。其余文件无需改动。
+### 关键文件说明
+
+| 文件 | 作用 | 你是否需要修改 |
+|------|------|---------------|
+| `js/data.js` | 存储所有系列和照片的元数据 | ✅ 日常维护主要改这个 |
+| `tools/prepare_images.py` | 批量处理原图生成网站资源 | ✅ 可修改分类映射 |
+| `tools/upload_to_r2.py` | 上传处理好的图片到R2 | ❌ 配置好后不用改 |
+| `css/style.css` | 网站样式 | ❌ 一般不用改 |
+| `*.html` | 页面结构 | ❌ 一般不用改 |
 
 ---
 
 ## 2. 本地预览
 
-无需安装任何东西，用 Python 自带服务器即可：
-
-```powershell
-# 在项目根目录 d:\photoweb 下执行
-python -m http.server 8000
+```bash
+# macOS
+cd /Users/liuzihao/Documents/Creative/Photography/photopage
+python3 -m http.server 8000
 ```
 
 浏览器打开 `http://localhost:8000` 即可预览。
 
-> 没有 Python？也可用 VS Code 的 “Live Server” 插件，右键 `index.html` → Open with Live Server。
+---
+
+## 3. 部署与技术栈
+
+### 当前部署方案
+
+| 服务 | 用途 | 链接 |
+|------|------|------|
+| GitHub | 代码托管 | github.com/Lzhntjs/PhotoPage |
+| Cloudflare Pages | 网站部署 | photopage-8dh.pages.dev |
+| Cloudflare R2 | 图片存储 | 存储桶：lucaliu-photos |
+
+### 自动部署机制
+
+```
+git push → GitHub main branch → Cloudflare Pages 自动部署
+```
+
+每次推送代码到 GitHub，Cloudflare Pages 会自动拉取最新代码并部署，无需手动操作。
 
 ---
 
-## 3. 部署教程（从零开始）
+## 4. R2 图片存储规则
 
-> 全程图形界面操作，零命令行（除本地可选的 git 外）。下面以“GitHub + Vercel + Cloudflare”组合为例。
+### 存储桶结构
 
-### 3.1 注册账号（全部免费）
-
-- GitHub：https://github.com（代码托管）
-- Vercel：https://vercel.com（用 GitHub 账号一键登录即可）
-- Cloudflare：https://dash.cloudflare.com（DNS/CDN/R2/HTTPS）
-
-### 3.2 上传代码到 GitHub
-
-1. 登录 GitHub → 右上角 `+` → **New repository**
-   - Repository name：`photoweb`
-   - 选择 **Public**（Private 也能部署，但 Public 最省心）
-   - **不要**勾选 “Add a README”（本仓库已有）
-   - 点 **Create repository**
-2. 在 GitHub 仓库页面点 **uploading an existing file**（“上传已有文件”链接）
-3. 把 `d:\photoweb` 里**所有文件和文件夹**拖进去（含 `.gitignore`、`vercel.json`、`css/`、`js/`、`images/`、各 `.html`）
-4. 提交信息写 `init` → **Commit changes**
-
-> 想用 git 命令行也可：
-> ```powershell
-> cd d:\photoweb
-> git init
-> git add .
-> git commit -m "init"
-> git branch -M main
-> git remote add origin https://github.com/你的用户名/photoweb.git
-> git push -u origin main
-> ```
-
-### 3.3 Vercel 关联部署（方案一：免费子域名）
-
-1. 登录 https://vercel.com → 右上角 **Add New…** → **Project**
-2. 在 “Import Git Repository” 列表里找到 `photoweb` → 点 **Import**
-3. 配置页面**全部保持默认**（Framework Preset 会自动识别为 Other，无需改）→ 直接点 **Deploy**
-4. 等待约 30 秒，出现 “Congratulations” 即部署成功
-5. 点 **Visit** 即可看到网站，地址形如 `https://photoweb-xxxxx.vercel.app`
-
-**以后每次你更新 GitHub 仓库，Vercel 会自动重新部署，无需任何操作。**
-
-### 3.4 Cloudflare R2 存储桶创建 + 公共访问
-
-> R2 用来存高清大图（长边 3000px），网页只引用其 URL，不打入构建包，规避 Vercel 250MB 限制。
-
-1. 登录 Cloudflare 控制台 → 左侧 **R2 Object Storage**（首次需点 Activate，**无需绑卡也能用免费额度**，但开启自定义域名公开访问需绑定一张卡做验证——不会扣费）
-2. 点 **Create bucket**
-   - Bucket name：`lucaliu-photos`
-   - Location：留空（Auto）或选离你近的区域
-   - 点 **Create**
-3. 启用**公共访问**（让网页能直接读图）：
-   - 进入 bucket → **Settings** → **Public access**
-   - 点 **Connect domain**，输入一个子域名，例如 `media.你的域名.com`
-   - 前提：该域名需已托管在 Cloudflare（见 3.7/3.8）。Cloudflare 会自动添加一条 CNAME，几秒后生效
-   - 配好后会得到公共访问基址，如 `https://media.你的域名.com`
-4. 上传图片：
-   - 进入 bucket → **Objects** → **Upload**，把高清大图（如 `landscape-01.jpg`）拖入
-   - 上传后该图公共 URL 即为 `https://media.你的域名.com/landscape-01.jpg`
-
-> 没有“自定义域名”时，R2 还提供一个 `*.r2.dev` 的临时公开地址（bucket Settings → R2.dev subdomain → Allow），仅供测试，生产请用自定义域名。
-
-### 3.5 R2 图片防盗链配置
-
-目标：仅允许你的网站加载 R2 图片，禁止其他站点盗链。用 Cloudflare Worker 做 Referer 校验最稳：
-
-1. Cloudflare 控制台 → 左侧 **Workers & Pages** → **Create application** → **Create Worker**
-2. 名字随意（如 `r2-hotlink`）→ **Deploy** → **Edit code**
-3. 把下面代码粘贴进编辑器（替换默认内容），把 `你的域名.com` 改成你的真实域名：
-
-```js
-export default {
-  async fetch(request, env) {
-    const referer = request.headers.get('Referer') || '';
-    const allow = ['你的域名.com', 'www.你的域名.com', 'localhost', 'vercel.app'];
-    const ok = allow.some(d => new URL(referer || 'http://x').hostname.endsWith(d));
-    if (!ok && referer !== '') {
-      return new Response('Forbidden', { status: 403 });
-    }
-    const url = new URL(request.url);
-    const object = await env.PHOTOS.get(url.pathname.slice(1));
-    if (!object) return new Response('Not Found', { status: 404 });
-    const headers = new Headers();
-    object.writeHttpMetadata(headers);
-    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-    headers.set('Access-Control-Allow-Origin', 'https://你的域名.com');
-    return new Response(object.body, { headers });
-  }
-};
+```
+lucaliu-photos/
+├── thumbs/           1920px 缩略图（用于封面、网格预览）
+│   ├── noncata-01.jpg
+│   ├── noncata-02.jpg
+│   └── ...
+└── (根目录)          3000px 高清大图（用于详情页、灯箱）
+    ├── noncata-01.jpg
+    ├── noncata-02.jpg
+    └── ...
 ```
 
-4. 点 **Save and deploy**
-5. 绑定 R2 到该 Worker：Worker 详情页 → **Settings** → **Bindings** → **Add binding**
-   - 选 **R2 bucket**，Variable name 填 `PHOTOS`，选你的 bucket `lucaliu-photos` → **Deploy**
-6. 给 Worker 绑定路由（让 `media.你的域名.com` 走这个 Worker）：
-   - Worker → **Settings** → **Triggers** → **Custom Domains** → **Add Custom Domain** → 填 `media.你的域名.com`
-   - 这样访问 `media.你的域名.com/xx.jpg` 就会经过防盗链校验
+### 命名规则
 
-> 懒人方案：也可只开 Cloudflare 的 **Scrape Shield → Hotlink Protection**（一键开关，整域名生效），但它是粗粒度的；上面的 Worker 更精准且可加 CORS。
+- 缩略图和大图使用**相同文件名**
+- 格式：`{系列ID}-{序号}.jpg`
+- 示例：`sydney-01.jpg`, `randomlife-01.jpg`
 
-### 3.6 替换占位图为你的真实作品
+### URL 格式
 
-打开 `js/data.js`，把示例作品里的 `cover` 和 `full` 改成你的真实地址：
+```
+缩略图: https://pub-xxx.r2.dev/thumbs/{文件名}
+大图:   https://pub-xxx.r2.dev/{文件名}
+```
 
-```js
+### data.js 中的引用
+
+```javascript
 {
-  id: "misty-dawn",
-  title: "Morning Mist",
-  category: "Landscape",
-  date: "2024-03-15",
-  location: "Yunnan, China",      // 你填写
-  camera: "Leica Q3",             // 你填写
-  lens: "28mm f/1.7",            // 你填写
-  notes: "First light over the valley...",  // 你填写
-  cover: "images/thumbnails/misty-dawn.jpg",                 // 仓库内小图
-  full:  "https://media.你的域名.com/misty-dawn.jpg",         // R2 大图
-  featured: true
+  id: "sydney",
+  // ...
+  cover: "https://pub-xxx.r2.dev/thumbs/sydney-01.jpg",  // 封面用缩略图
+  photos: [
+    { src: "https://pub-xxx.r2.dev/sydney-01.jpg" },     // 详情页用大图
+    { src: "https://pub-xxx.r2.dev/sydney-02.jpg" }
+  ]
 }
 ```
 
-- `cover`：把缩略图（长边 ≤1920px）放进 `images/thumbnails/`，路径写 `images/thumbnails/文件名.jpg`
-- `full`：填 R2 大图 URL（长边 3000px）
-- 提交到 GitHub → Vercel 自动重新部署 → 网站更新
-
-### 3.7 绑定自定义域名（方案二：正式作品集）
-
-> Vercel 海外托管绑定自定义域名**不需要 ICP 备案**。
-
-1. 先有一个域名（见下文“域名选购建议”）
-2. 域名托管到 Cloudflare（见 3.8 第 1 步）
-3. Vercel 项目页 → **Settings** → **Domains** → 输入你的域名（如 `yourname.art`）→ **Add**
-4. Vercel 会显示需要添加的 DNS 记录（一条 CNAME 指向 `cname.vercel-dns.com`）
-5. 去 Cloudflare DNS 添加该 CNAME（见 3.8 第 4 步）→ 回 Vercel 点 **Refresh**，几秒后变绿，HTTPS 自动签发完成
-
-### 3.8 Cloudflare DNS 解析与 HTTPS
-
-1. Cloudflare 控制台 → **Add a site** → 输入你的域名 → 选 **Free 计划**
-2. Cloudflare 会给你两个 **nameserver**（如 `xxx.ns.cloudflare.com`）
-3. 去你买域名的注册商后台 → 修改域名的 **Nameserver** 为 Cloudflare 给的这两个 → 等待生效（几分钟到数小时）
-4. DNS 解析：Cloudflare → 你的站点 → **DNS** → **Records** → **Add record**
-   - 主域名：类型 `CNAME`，Name `@` 或 `yourname.art`，Target `cname.vercel-dns.com`，Proxy 开启（橙色云）
-   - 媒体子域：类型 `CNAME`，Name `media`，Target R2/Worker 给的地址，Proxy 开启
-5. HTTPS：Cloudflare → **SSL/TLS** → 模式选 **Full** 或 **Full (strict)**；证书 Cloudflare 自动签发，无需操作
-6. 强制 HTTPS：**SSL/TLS** → **Edge Certificates** → 开启 **Always Use HTTPS**
-
-**域名选购建议**：
-
-| 后缀 | 年费约 | 说明 |
-|------|--------|------|
-| `.com` | ¥80–120 | 最通用、最稳，适合正式作品集 |
-| `.art` | ¥80–150 | 艺术气息强，摄影作品集首选 |
-| `.xyz` | ¥30–60 | 便宜，短而个性 |
-| `.photography` | ¥150–250 | 语义清晰但偏长 |
-
-> 推荐在 Cloudflare Registrar（Cloudflare 自营域名注册）购买，**成本价续费、不加价**，且与 DNS/CDN 一站式管理。
-
 ---
 
-## 4. 两套域名方案对比
+## 5. 日常维护手册
 
-| 维度 | 方案一（测试） | 方案二（正式作品集） |
-|------|----------------|----------------------|
-| 域名 | `photoweb-xxxxx.vercel.app` | `yourname.com` / `.art` / `.xyz` |
-| 成本 | 完全免费 | 仅域名年费（约 ¥30–250/年） |
-| 是否需备案 | 否 | 否（Vercel 海外托管，自定义域名**无需 ICP 备案**） |
-| 平台后缀 | 有 vercel.app 后缀 | 无后缀，干净独立官网 |
-| HTTPS | 自动 | 自动（Cloudflare 签发） |
-| 适用阶段 | 前期预览调试 | 正式对外作品集 |
+### 5.1 新增图片到已有系列
 
----
+#### 场景：给 "Sydney" 系列添加新照片
 
-## 5. 运维手册
+**步骤 1：准备原图**
+- 把新照片放入 `photofile/Sydney/` 文件夹
+- 文件命名建议按顺序：`IMG_001.jpg`, `IMG_002.jpg` 等
 
-> 核心原则：**新增/删除/修改作品只改 `js/data.js`，不动任何其他代码。**
-
-### 5.0 批量处理照片（推荐，一次处理一整批原图）
-
-把原图放进 `photofile/<文件夹>/`（如 `photofile/Sydney/`、`photofile/Takamatsu/`），文件夹名可在脚本顶部 `FOLDER_CATEGORY` 映射到分类。然后：
-
-```powershell
-# 一次性生成缩略图(1920px入仓库) + 展示大图(3000px待传R2) + 更新 data.js
-python tools/prepare_images.py
+**步骤 2：运行处理脚本**
+```bash
+cd /Users/liuzihao/Documents/Creative/Photography/photopage
+python3 tools/prepare_images.py --r2-base https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev
 ```
 
-- 支持 JPG / PNG / DNG / CR2 / NEF / ARW（RAW 需 `pip install rawpy`）
-- 测试期 `full` 自动用本地缩略图，**无需 R2 即可在网站看到真实照片**
-- R2 + 自定义域名就绪后，重跑一次切到生产模式：
-  `python tools/prepare_images.py --r2-base https://media.你的域名.com`
-- 之后按需手动编辑 `js/data.js` 里的 `title / category / date / location / camera / lens / notes`
+脚本会自动：
+- 读取 `photofile/Sydney/` 中所有图片
+- 生成 1920px 缩略图到 `images/thumbnails/`
+- 生成 3000px 大图到 `r2-upload/`
+- 更新 `js/data.js` 中的 series 数据
 
-> 单张新增也可用下面的手动流程。
+**步骤 3：上传到 R2**
+```bash
+# 设置环境变量（首次需要）
+export R2_ACCOUNT_ID="你的account_id"
+export R2_ACCESS_KEY="你的access_key"
+export R2_SECRET_KEY="你的secret_key"
+export R2_BUCKET="lucaliu-photos"
 
-### 5.1 新增作品（完整工作流）
+# 执行上传
+python3 tools/upload_to_r2.py
+```
 
-1. 准备两张图：
-   - 缩略图：长边 ≤1920px，命名如 `new-work.jpg`
-   - 高清大图：长边 3000px，同款命名
-2. 缩略图放进 `images/thumbnails/new-work.jpg`，提交到 GitHub
-3. 高清大图上传到 Cloudflare R2 bucket（3.4 第 4 步）
-4. 打开 `js/data.js`，在 `window.WORKS` 数组里**复制一条**，改字段：
+**步骤 4：检查并微调 data.js**
+打开 `js/data.js`，检查新添加的系列数据，手动修改：
+- `title`：系列标题
+- `year`：年份
+- `category`：分类（Landscape/Travel/Street/Portrait）
+- `date`：日期
+- `location`：地点（可选）
+- `camera`：相机（可选）
+- `lens`：镜头（可选）
+- `notes`：说明文字（可选）
+- `featured`：是否在首页展示（true/false）
 
-```js
+**步骤 5：提交到 GitHub**
+```bash
+cd /Users/liuzihao/Documents/Creative/Photography/photopage
+git add -A
+git commit -m "Add new photos to Sydney series"
+git push origin main
+```
+
+Cloudflare Pages 会自动部署，等待 1-2 分钟后刷新网页即可看到更新。
+
+---
+
+### 5.2 创建新系列/新分类
+
+#### 场景：创建一个新的 "Tokyo" 系列
+
+**步骤 1：创建文件夹并放入原图**
+```
+photofile/Tokyo/
+├── IMG_001.jpg
+├── IMG_002.jpg
+└── ...
+```
+
+**步骤 2：修改分类映射（如果需要新分类）**
+打开 `tools/prepare_images.py`，找到 `FOLDER_CATEGORY` 字典：
+
+```python
+FOLDER_CATEGORY = {
+    "Film": "Street",
+    "Sydney": "Travel",
+    "Takamatsu": "Travel",
+    "Tokyo": "Travel",  # ← 添加新映射
+}
+DEFAULT_CATEGORY = "Travel"
+```
+
+**步骤 3：运行处理脚本**
+```bash
+python3 tools/prepare_images.py --r2-base https://pub-xxx.r2.dev
+```
+
+**步骤 4：上传到 R2**
+```bash
+python3 tools/upload_to_r2.py
+```
+
+**步骤 5：编辑 data.js**
+打开 `js/data.js`，找到新生成的 series 对象，补全信息：
+
+```javascript
 {
-  id: "new-work",                 // 唯一，英文+数字
-  title: "New Work",
-  category: "Travel",            // Landscape / Travel / Street / Portrait
-  date: "2025-01-01",
-  location: "",
-  camera: "",
-  lens: "",
-  notes: "",
-  cover: "images/thumbnails/new-work.jpg",
-  full: "https://media.你的域名.com/new-work.jpg",
-  featured: false                // true 则上首页精选
+  "id": "tokyo",
+  "title": "Tokyo",
+  "year": 2025,
+  "category": "Travel",
+  "date": "2025-05-01",
+  "location": "Tokyo, Japan",
+  "camera": "",
+  "lens": "",
+  "notes": "",
+  "cover": "https://pub-xxx.r2.dev/thumbs/tokyo-01.jpg",
+  "full": "https://pub-xxx.r2.dev/tokyo-01.jpg",
+  "featured": true,  // 如果想在首页展示
+  "photos": [
+    { "src": "https://pub-xxx.r2.dev/tokyo-01.jpg", "caption": "" },
+    { "src": "https://pub-xxx.r2.dev/tokyo-02.jpg", "caption": "" }
+  ]
 }
 ```
 
-5. 提交到 GitHub → Vercel 自动重新部署 → 完成
+**步骤 6：提交到 GitHub**
+```bash
+git add -A
+git commit -m "Add new Tokyo series"
+git push origin main
+```
 
-### 5.2 删除作品
+#### 添加新分类
 
-在 `js/data.js` 里删掉对应那条 `{ ... }`（注意保留前后的逗号正确），提交即可。R2 上的大图可留着也可手动删（不删也不计多少费用）。
+当前支持的分类：`Landscape`, `Travel`, `Street`, `Portrait`
 
-### 5.3 修改作品信息
+如需添加新分类（如 `Architecture`）：
+1. 在 `js/data.js` 的 `Works.categories()` 方法中添加：
+```javascript
+categories: function () {
+  return ["Landscape", "Travel", "Street", "Portrait", "Architecture"];
+}
+```
+2. 在 `tools/prepare_images.py` 的 `FOLDER_CATEGORY` 中使用新分类
 
-直接改 `js/data.js` 里对应那条的字段（如改 `title`、补 `location`、换 `cover`），提交即可。
+---
 
-### 5.4 调整网站风格
+### 5.3 删除图片或系列
 
-常见调整都在 `css/style.css` 顶部的设计令牌里改一个值即可全局生效：
+#### 删除单张图片
+
+1. 打开 `js/data.js`
+2. 找到对应 series 的 `photos` 数组
+3. 删除要移除的照片对象
+4. 同时更新 `cover` 为该系列剩余照片的第一张
+5. 提交到 GitHub
+
+#### 删除整个系列
+
+1. 打开 `js/data.js`
+2. 找到对应的 series 对象
+3. 删除整个对象（注意数组逗号）
+4. 提交到 GitHub
+
+#### 清理 R2 上的图片（可选）
+
+如果确定不再需要，可以在 Cloudflare Dashboard 删除 R2 上的文件：
+- 访问 Cloudflare → R2 → `lucaliu-photos`
+- 分别在 `thumbs/` 和根目录删除对应的 `.jpg` 文件
+
+---
+
+### 5.4 修改作品信息
+
+直接编辑 `js/data.js` 中对应 series 对象的字段：
+
+```javascript
+{
+  "id": "sydney",
+  "title": "Sydney",           // 修改标题
+  "year": 2023,                 // 修改年份
+  "category": "Travel",         // 修改分类
+  "date": "2023-03-15",        // 修改日期
+  "location": "Sydney, Australia",  // 添加地点
+  "camera": "Fujifilm X-T5",   // 添加相机
+  "lens": "16-80mm F4",        // 添加镜头
+  "notes": "A trip to Sydney...",  // 添加说明
+  "featured": true               // 设为首页展示
+}
+```
+
+提交后自动部署即可。
+
+---
+
+### 5.5 调整网站风格
+
+#### 修改颜色/字体
+
+打开 `css/style.css`，顶部的 CSS 变量：
 
 ```css
 :root {
-  --paper: #FAFAF7;   /* 改背景色 */
-  --ink:   #2B2B28;   /* 改文字色 */
-  --muted: #9A9A92;   /* 改次级文字色 */
-  --maxw:   1280px;   /* 改内容最大宽度 */
+  --paper: #FAFAF7;   /* 背景色 */
+  --ink:   #2B2B28;   /* 主文字色 */
+  --muted: #9A9A92;   /* 次级文字色 */
+  --accent: #C87E5C;  /* 强调色 */
 }
 ```
 
-- 想换字体：改 `css/style.css` 顶部 `@import` 的 Google Fonts 链接 + `font-family`
-- 想改间距/留白：改 `section-breathe` 的 `padding-block` 值
-- 想加分类：在 `js/data.js` 的 `categories()` 里加，并在作品 `category` 字段使用
+#### 修改首页布局
+
+编辑 `index.html` 和 `js/home.js`。
+
+#### 添加新页面
+
+复制现有的 `.html` 文件作为模板，修改内容后提交。
 
 ---
 
-## 6. 后续迭代指令模板
+## 6. 完整工作流示例
 
-后续修改网站，直接把下面这类自然语言指令发给 AI（如 Trae），它就能改：
+### 6.1 处理一批新照片的完整流程
 
-- “把首页精选作品改成显示 6 张”
-- “相册页改成三列网格”
-- “导航加一个 Prints 入口指向 about.html#prints”
-- “作品详情页加一个‘相机参数’区块，显示 ISO/光圈/快门”
-- “把整站字体换成 Cormorant 衬线字体”
-- “首页加一段大标题引言，文字居中”
-- “把背景色从米白改成纯白 #FFFFFF”
+#### 场景：从相机导入 20 张照片创建 "Beijing 2025" 系列
 
-> 改完后 `python -m http.server 8000` 本地确认，再提交 GitHub 自动上线。
+```bash
+# 第 1 步：准备原图
+mkdir -p photofile/Beijing2025
+# 把相机照片复制到 photofile/Beijing2025/
+
+# 第 2 步：安装依赖（首次）
+pip install pillow rawpy boto3
+
+# 第 3 步：运行处理脚本
+python3 tools/prepare_images.py \
+  --r2-base https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev
+
+# 第 4 步：上传到 R2
+export R2_ACCOUNT_ID="xxx"
+export R2_ACCESS_KEY="xxx"
+export R2_SECRET_KEY="xxx"
+export R2_BUCKET="lucaliu-photos"
+python3 tools/upload_to_r2.py
+
+# 第 5 步：编辑 js/data.js
+# 打开文件，找到 "beijing2025" series，补全信息
+
+# 第 6 步：本地预览
+python3 -m http.server 8000
+# 浏览器访问 http://localhost:8000 检查效果
+
+# 第 7 步：提交部署
+git add -A
+git commit -m "Add Beijing 2025 series (20 photos)"
+git push origin main
+
+# 第 8 步：等待 Cloudflare Pages 自动部署（约 1-2 分钟）
+```
 
 ---
 
-## 7. 免费边界与避坑清单
+## 7. R2 管理最佳实践
 
-### Vercel 免费版（Hobby 计划）限制
+### 文件组织
 
-- ✅ 带宽：**100 GB/月**免费（图片走 R2 不计入，所以基本用不完）
-- ⚠️ **构建产物 250 MB 硬限制** → 这就是为什么大图必须放 R2，仓库只放缩略图
-- ✅ 每次构建时长：免费版 45 分钟（本站秒级构建，远不到）
-- ⚠️ 商业用途：Hobby 计划条款上“非商业”，纯个人作品集没问题；若以后商业售卖再升 Pro（$20/月）
+- ✅ **保持命名一致**：`{series-id}-{seq}.jpg`，如 `sydney-01.jpg`
+- ✅ **同系列连续编号**：01, 02, 03...
+- ❌ **避免特殊字符**：不用中文、空格、特殊符号
+- ❌ **不要重复编号**：不同系列的文件允许重名（如都有 `-01`）
+
+### 图片规格
+
+| 类型 | 长边 | 质量 | 用途 |
+|------|------|------|------|
+| 缩略图 | 1920px | 86% | 列表页封面、网格 |
+| 大图 | 3000px | 88% | 详情页、灯箱 |
+
+### 缓存策略
+
+脚本已设置长期缓存（`CacheControl: "public, max-age=31536000, immutable"`），更新图片后如需刷新缓存：
+- 在 Cloudflare Dashboard 删除对应文件再重新上传
+- 或在 data.js 中修改引用 URL 添加查询参数：`?v=2`
+
+### R2 API Token 安全
+
+- ✅ 使用 Object Read & Write 权限的 Token
+- ✅ 只指定需要的 bucket
+- ❌ 不要把 Token 提交到 Git 仓库
+- ❌ 不要在公开场合分享 Token
+
+---
+
+## 8. 免费额度与避坑清单
 
 ### Cloudflare R2 免费额度
 
-- ✅ 存储：**10 GB/月免费**
-- ✅ A 类操作（写/列表）：**100 万次/月免费**
-- ✅ B 类操作（读）：**1000 万次/月免费**
-- ✅ **出站流量（egress）完全免费**（相对 AWS S3 的最大优势）
-- 详见第 8 节计费
+| 项目 | 免费额度 |
+|------|----------|
+| 存储 | 10 GB/月 |
+| A 类操作（写/列表） | 100 万次/月 |
+| B 类操作（读） | 1000 万次/月 |
+| 出站流量 | **完全免费** |
 
-### Cloudflare 免费版（DNS/CDN/Worker）
+### Cloudflare Pages 免费额度
 
-- ✅ DNS + CDN + 无限 HTTPS 证书：免费
-- ⚠️ Worker 免费版：**10 万次请求/天**（防盗链校验走 Worker；个人作品集访问量远低于此）
-- ⚠️ Worker 单次执行 CPU 时间 10ms 限制（防盗链够用）
+| 项目 | 免费额度 |
+|------|----------|
+| 带宽 | 无限 |
+| 构建次数 | 无限 |
+| 请求数 | 无限 |
 
-### 常见坑
+### 常见问题
 
-| 坑 | 规避 |
-|----|------|
-| 仓库塞满大图导致 Vercel 构建包超 250MB 报错 | 大图一律放 R2，仓库只放 ≤1920px 缩略图 |
-| RAW 直出十几 MB 原图上传 R2 导致加载卡顿 | 导出时长边压到 3000px、JPEG 质量 85 左右 |
-| 图片在网页显示裂图 / 403 | 检查 R2 公共访问是否开启；防盗链 Worker 的 Referer 白名单是否含你的域名和 `vercel.app`（测试期） |
-| 自定义域名打不开 | DNS 的 CNAME 是否添加、Cloudflare 代理云朵是否开启、Vercel Domains 是否点 Refresh |
-| 国内访问慢 | Vercel 节点偶有波动属正常；图片走 Cloudflare CDN 通常很快；正文站本身极轻量影响小 |
-| 域名忘记续费被抢注 | 注册商后台开启“自动续费”，提前 30 天续费 |
+| 问题 | 解决方案 |
+|------|----------|
+| 图片显示 404 | 检查 R2 文件是否存在、URL 是否正确 |
+| 图片加载慢 | 检查 R2 公共访问是否开启、图片是否过大 |
+| 新增图片不显示 | 检查 data.js 的 photos 数组是否已更新 |
+| 分类筛选不到 | 检查 category 字段是否正确、categories() 方法是否包含该分类 |
+| 本地预览正常但线上异常 | 强制刷新浏览器（Cmd+Shift+R）或清 CDN 缓存 |
+| Cloudflare Pages 部署失败 | 检查 GitHub 连接状态、查看部署日志 |
 
----
+### 迁移到 Cloudflare Pages 的原因
 
-## 8. Cloudflare R2 计费说明
-
-| 项目 | 免费额度 | 超出后价格 |
-|------|----------|------------|
-| 存储 | 10 GB / 月 | $0.015 / GB / 月 |
-| A 类操作（写、列表） | 1,000,000 次 / 月 | $4.50 / 百万次 |
-| B 类操作（读） | 10,000,000 次 / 月 | $0.36 / 百万次 |
-| 出站流量（egress） | **完全免费** | $0 |
-
-> 一个个人摄影作品集，假设 200 张高清大图、每张 3MB，总存储约 0.6GB，远在 10GB 内；读取量更是远低于千万级。**实际几乎不会产生费用。**
-> 出站流量完全免费是 R2 的核心优势——即便你的作品被大量浏览也不会产生带宽费。
+| 对比项 | Vercel | Cloudflare Pages |
+|--------|--------|------------------|
+| 国内访问 | ❌ 不稳定 | ✅ 稳定快速 |
+| 免费带宽 | 100GB/月 | ✅ 无限 |
+| R2 集成 | 需额外配置 | ✅ 原生支持 |
+| 自动部署 | ✅ | ✅ |
 
 ---
 
-## 9. 免费 / 付费环节一览
+## 设计与版权
 
-| 环节 | 是否免费 | 金额 |
-|------|----------|------|
-| 代码托管 GitHub | 免费 | ¥0 |
-| 网站部署 Vercel | 免费（Hobby） | ¥0 |
-| Vercel 子域名 `.vercel.app` | 免费 | ¥0 |
-| 自定义域名 | **付费（唯一硬支出）** | 约 ¥30–250 / 年（依后缀） |
-| 域名续费 | 付费 | 同上，建议开自动续费 |
-| Cloudflare DNS/CDN/HTTPS | 免费 | ¥0 |
-| Cloudflare R2 存储 | 免费（10GB 内） | ¥0 |
-| Cloudflare Worker 防盗链 | 免费（10万次/天内） | ¥0 |
-| ICP 备案 | 不需要 | — |
-
-**结论：除域名年费外，整站完全免费运行；唯一需要付费的就是域名本身。**
+- 视觉设计原创，参考川内伦子摄影官网的安静克制气质
+- 字体：Cormorant Garamond（衬线）
+- 主色调：暖灰米白 `#FAFAF7`、墨色 `#2B2B28`
+- 页脚版权信息由 `js/data.js` 的 `window.SITE` 控制
 
 ---
 
-### 设计与版权
+## 快速参考
 
-- 视觉设计原创，参考川内伦子摄影官网的安静克制气质，未复制其代码或页面结构
-- 所有 UI 文字均为英文；作品元数据（地点、设备、文案）留给你自行填写
-- 页脚版权年份与署名由 `js/data.js` 的 `window.SITE` 自动生成，改 `startYear` / `author` 即可
+```bash
+# 本地预览
+python3 -m http.server 8000
 
-遇到问题，把现象描述发给 AI，它按本手册结构定位即可。
+# 处理新照片
+python3 tools/prepare_images.py --r2-base https://pub-xxx.r2.dev
+
+# 上传到 R2
+python3 tools/upload_to_r2.py
+
+# 提交部署
+git add -A && git commit -m "update" && git push origin main
+```
+
+**记住：日常只需要维护 `js/data.js` 和 `photofile/` 文件夹！**

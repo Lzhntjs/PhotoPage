@@ -770,6 +770,7 @@ main { animation: pageIn 1s var(--ease) both; }
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .home-stage-img {
@@ -779,7 +780,7 @@ main { animation: pageIn 1s var(--ease) both; }
   opacity: 1;
   transition: opacity .6s var(--ease);
   user-select: none;
-  cursor: pointer;
+  pointer-events: none;  /* 让点击事件穿透到容器 */
 }
 
 .home-stage-img.overlay {
@@ -789,7 +790,6 @@ main { animation: pageIn 1s var(--ease) both; }
   transform: translate(-50%, -50%);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .6s var(--ease);
 }
 
 /* 图片信息（左下角，半透明背景） */
