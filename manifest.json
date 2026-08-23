@@ -1,0 +1,69 @@
+{
+  "site": {
+    "name": "LucaLiu Photography",
+    "author": "Luca Liu",
+    "startYear": 2024,
+    "social": []
+  },
+  "series": [
+    {
+      "id": "noncata",
+      "title": "Noncata",
+      "year": 2025,
+      "category": "Travel",
+      "date": "2025-02-20",
+      "location": "",
+      "camera": "",
+      "lens": "",
+      "notes": "",
+      "cover": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/noncata-01.jpg",
+      "full": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/noncata-01.jpg",
+      "featured": true,
+      "photos": [
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/noncata-01.jpg", "caption": "" },
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/noncata-02.jpg", "caption": "" },
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/noncata-03.jpg", "caption": "" }
+      ]
+    },
+    {
+      "id": "randomlife",
+      "title": "RandomLife",
+      "year": 2025,
+      "category": "Travel",
+      "date": "2025-04-20",
+      "location": "",
+      "camera": "",
+      "lens": "",
+      "notes": "",
+      "cover": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/randomlife-01.jpg",
+      "full": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/randomlife-01.jpg",
+      "featured": false,
+      "photos": [
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/randomlife-01.jpg", "caption": "" },
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/randomlife-02.jpg", "caption": "" },
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/randomlife-03.jpg", "caption": "" }
+      ]
+    },
+    {
+      "id": "sydney",
+      "title": "Sydney",
+      "year": 2015,
+      "category": "Travel",
+      "date": "2015-01-06",
+      "location": "",
+      "camera": "",
+      "lens": "",
+      "notes": "",
+      "cover": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/thumbs/sydney-01.jpg",
+      "full": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-01.jpg",
+      "featured": false,
+      "photos": [
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-01.jpg", "caption": "" },
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-02.jpg", "caption": "" },
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-03.jpg", "caption": "" },
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-04.jpg", "caption": "" },
+        { "src": "https://pub-90fa7196a28e419894e73529296c0b5c.r2.dev/sydney-05.jpg", "caption": "" }
+      ]
+    }
+  ]
+}

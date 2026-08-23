@@ -8,6 +8,7 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
+    window.WorksReady.then(function () {
     var root = document.getElementById('series-root');
     if (!root) return;
 
@@ -62,6 +63,7 @@
     });
 
     observe(root);
+    }); // WorksReady
   });
 
   function metaRow(label, value) {

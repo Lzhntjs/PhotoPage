@@ -63,9 +63,23 @@ def main():
         config=Config(signature_version="s3v4"),
     )
 
+    # 0) 上传 manifest.json → 根目录
+    manifest = ROOT / "manifest.json"
+    if manifest.exists():
+        print("\n[0/3] 上传 manifest.json → 根目录...")
+        try:
+            s3.upload_file(str(manifest), BUCKET, "manifest.json",
+                           ExtraArgs={"ContentType": "application/json",
+                                      "CacheControl": "no-cache"})
+            print("  [OK]   manifest.json → manifest.json")
+        except Exception as e:
+            print("  [FAIL] manifest.json : {}".format(e))
+    else:
+        print("\n[0/3] 未找到 manifest.json，跳过")
+
     # 1) 缩略图 → thumbs/ 目录
     thumbs = sorted(THUMB_DIR.glob("*.jpg")) if THUMB_DIR.exists() else []
-    print("\n[1/2] 上传缩略图（1920px）→ thumbs/ 目录...")
+    print("\n[1/3] 上传缩略图（1920px）→ thumbs/ 目录...")
     ok = fail = 0
     for p in thumbs:
         key = "thumbs/" + p.name
@@ -79,7 +93,7 @@ def main():
 
     # 2) 展示大图 → 根目录
     webs = sorted(WEB_DIR.glob("*.jpg")) if WEB_DIR.exists() else []
-    print("\n[2/2] 上传展示大图（3000px）→ 根目录...")
+    print("\n[2/3] 上传展示大图（3000px）→ 根目录...")
     for p in webs:
         key = p.name
         try:

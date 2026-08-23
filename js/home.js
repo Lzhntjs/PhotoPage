@@ -14,6 +14,8 @@
   document.addEventListener('DOMContentLoaded', function () {
     if (!window.Works) return;
 
+    window.WorksReady.then(function () {
+
     // 收集所有作品的第一张照片作为轮播图
     var allSeries = window.Works.allSeries();
     allSeries.forEach(function (s) {
@@ -31,6 +33,8 @@
 
     showPhoto(0, true);
     bindEvents();
+
+    }); // WorksReady
   });
 
   function getImgs() {

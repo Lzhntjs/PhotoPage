@@ -7,6 +7,7 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
+    window.WorksReady.then(function () {
     var root = document.getElementById('stream-root');
     if (!root) return;
 
@@ -42,6 +43,7 @@
     });
 
     observe(root);
+    }); // WorksReady
   });
 
   function observe(root) {

@@ -7,6 +7,7 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
+    window.WorksReady.then(function () {
     var root = document.getElementById('works-list');
     if (!root) return;
 
@@ -46,6 +47,7 @@
     root.innerHTML = html;
 
     observe(root);
+    }); // WorksReady
   });
 
   /* 动画 + 懒加载观察（与各页面一致） */

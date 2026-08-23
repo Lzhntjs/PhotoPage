@@ -7,6 +7,7 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
+    window.WorksReady.then(function () {
 
     /* ---- 版权年份自动计算 ---- */
     var yearEls = document.querySelectorAll('[data-year]');
@@ -117,6 +118,7 @@
     } else {
       reveals.forEach(function (el) { el.classList.add('in'); });
     }
+    }); // WorksReady
   });
 
   function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'; }); }
