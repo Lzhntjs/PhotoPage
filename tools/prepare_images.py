@@ -33,6 +33,7 @@ SRC = ROOT / "photofile"
 THUMB_DIR = ROOT / "images" / "thumbnails"
 WEB_DIR = ROOT / "r2-upload"
 DATA_JS = ROOT / "js" / "data.js"
+MANIFEST_JSON = ROOT / "manifest.json"
 
 THUMB_EDGE = 1920
 WEB_EDGE = 3000
@@ -136,6 +137,71 @@ def patch_data_js(series_list):
         print("⚠ 未能定位 window.SERIES 块，data.js 未修改（请检查文件格式）")
         return False
     DATA_JS.write_text(new_text, encoding="utf-8")
+    return True
+
+
+def update_manifest(series_list):
+    """生成/更新 manifest.json（保留已有的 site 信息和手动编辑的元数据）"""
+    # 读取现有 manifest（如果存在），保留手动编辑的元数据
+    existing = {}
+    if MANIFEST_JSON.exists():
+        try:
+            with open(MANIFEST_JSON, 'r', encoding='utf-8') as f:
+                existing_data = json.load(f)
+            # 用 id 作为 key，保留手动编辑的字段
+            for s in existing_data.get('series', []):
+                existing[s['id']] = s
+            existing_site = existing_data.get('site', {})
+        except:
+            existing_site = {}
+    else:
+        existing_site = {}
+
+    # 合并：新扫描的数据为基础，保留已有的手动编辑
+    merged = []
+    new_ids = set()
+    for s in series_list:
+        sid = s['id']
+        new_ids.add(sid)
+        if sid in existing:
+            # 保留已有元数据，只更新 photos/cover/full（可能新增了照片）
+            old = existing[sid]
+            merged.append({
+                "id": sid,
+                "title": old.get("title", s["title"]),
+                "year": old.get("year", s["year"]),
+                "category": old.get("category", s["category"]),
+                "date": old.get("date", s["date"]),
+                "location": old.get("location", ""),
+                "camera": old.get("camera", ""),
+                "lens": old.get("lens", ""),
+                "notes": old.get("notes", ""),
+                "cover": s["cover"],
+                "full": s["full"],
+                "featured": old.get("featured", s["featured"]),
+                "photos": s["photos"],  # photos 列表始终用最新的
+            })
+        else:
+            # 新系列，使用扫描结果
+            merged.append(s)
+
+    # 保留 manifest 中有但 photofile 中已不存在的系列（用户可能只是临时删了图）
+    for sid, old in existing.items():
+        if sid not in new_ids:
+            merged.append(old)
+
+    manifest = {
+        "site": existing_site or {
+            "name": "LucaLiu Photography",
+            "author": "Luca Liu",
+            "startYear": 2024,
+            "social": []
+        },
+        "series": merged
+    }
+
+    with open(MANIFEST_JSON, 'w', encoding='utf-8') as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
     return True
 
 
@@ -244,13 +310,15 @@ def main():
 
     if series_list:
         patch_data_js(series_list)
+        update_manifest(series_list)
 
     print("\n========== 处理完成 ==========")
     print("成功 {} 张，失败 {} 张".format(ok, fail))
     print("系列数：{} 个".format(len(series_list)))
     print("缩略图(1920px) → images/thumbnails/   （本地，需上传到 R2 的 thumbs/ 目录）")
     print("展示大图(3000px) → r2-upload/         （本地，需上传到 R2 根目录）")
-    print("js/data.js 的 window.SERIES 已更新（共 {} 个系列）".format(len(series_list)))
+    print("js/data.js 的 window.SERIES 已更新（兜底数据，共 {} 个系列）".format(len(series_list)))
+    print("manifest.json 已更新（用于 sync_r2.py 同步到 R2）")
     if not r2_base:
         print("\n[占位模式] 仓库不存图，网站打开时图片位置显示柔和占位块（onerror 自动兜底）。")
         print("Cloudflare R2 配好后，重新执行：")
@@ -260,8 +328,11 @@ def main():
         print("\n[生产模式] cover / full / photos 均指向 R2：{}".format(r2_base))
         print("  cover/photos → {}/thumbs/<id>.jpg".format(r2_base))
         print("  full         → {}/<id>.jpg".format(r2_base))
-    print("请按需编辑 js/data.js 里的 title / category / year / location / camera / lens / notes。")
+    print("请按需编辑 manifest.json 里的 title / category / year / location / camera / lens / notes。")
     print("分类映射可在 tools/prepare_images.py 顶部 FOLDER_CATEGORY 修改。")
+    print("\n下一步：运行 sync_r2.py 同步到 R2：")
+    print("  python3 tools/sync_r2.py --dry   # 预览")
+    print("  python3 tools/sync_r2.py         # 执行")
 
 
 if __name__ == "__main__":
